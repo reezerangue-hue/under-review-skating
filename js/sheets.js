@@ -210,14 +210,29 @@ const SheetsDB = (() => {
 
       const totalScores = results.filter(r => r.total_score > 0);
       const compScores  = results.filter(r => r.component_score > 0);
-      const podiums     = results.filter(r => r.placement > 0 && r.placement <= 3);
+
+      /* Overall podiums: top-3 combined (SP+FS) finish per competition */
+      const skaterCompIds = [...new Set(results.map(r => r.competition_id))];
+      const allResults    = cache.results.map(hydrateResult);
+      let podiumCount = 0;
+      skaterCompIds.forEach(compId => {
+        const compResults = allResults.filter(r => r.competition_id === compId && r.total_score > 0);
+        const combined = {};
+        compResults.forEach(r => {
+          combined[r.skater_id] = (combined[r.skater_id] || 0) + r.total_score;
+        });
+        const ranked = Object.entries(combined).sort((a, b) => b[1] - a[1]);
+        const pos = ranked.findIndex(([sid]) => sid === skaterId);
+        if (pos >= 0 && pos < 3) podiumCount++;
+      });
+      const numComps = skaterCompIds.length;
 
       return {
-        totalCompetitions: new Set(results.map(r => r.competition_id)).size,
+        totalCompetitions: numComps,
         avgTotal:          totalScores.length ? totalScores.reduce((s,r) => s + r.total_score, 0) / totalScores.length : 0,
         avgComponent:      compScores.length  ? compScores.reduce((s,r)  => s + r.component_score, 0) / compScores.length  : 0,
-        podiums:           podiums.length,
-        podiumRate:        results.length ? (podiums.length / results.length * 100).toFixed(0) : 'N/A',
+        podiums:           podiumCount,
+        podiumRate:        numComps ? (podiumCount / numComps * 100).toFixed(0) : 'N/A',
         ultraCAttempts:    ucElems.length,
         ultraCLandingRate: ucElems.length ? (ucLanded.length / ucElems.length * 100).toFixed(1) : 'N/A',
         topUCElement:      topUC ? topUC[0] : '—',
