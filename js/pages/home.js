@@ -31,15 +31,71 @@ async function renderHome() {
 
   const recentComps = competitions.slice(0, 6);
 
-  const featuredSkaters = [...skaters]
-    .filter(s => s.season_best_total > 0)
-    .sort((a, b) => b.season_best_total - a.season_best_total)
-    .slice(0, 10);
+  /* Unique seasons from competitions, newest first */
+  const seasons = [...new Set(competitions.filter(c => c.season).map(c => c.season))]
+    .sort((a, b) => b.localeCompare(a));
 
-  const allTimeSkaters = [...skaters]
-    .filter(s => s.personal_best_total > 0)
-    .sort((a, b) => b.personal_best_total - a.personal_best_total)
-    .slice(0, 10);
+  /* Per-season best combined totals from actual results */
+  const compSeasonMap = Object.fromEntries(competitions.map(c => [c.id, c.season]));
+  const seasonBestBySkater = {}; // seasonBestBySkater[season][skater_id] = best combined total
+  const compCombined = {};
+  results.forEach(r => {
+    if (!r.total_score) return;
+    const key = `${r.competition_id}__${r.skater_id}`;
+    if (!compCombined[key]) compCombined[key] = { comp_id: r.competition_id, skater_id: r.skater_id, total: 0 };
+    compCombined[key].total += r.total_score;
+  });
+  Object.values(compCombined).forEach(({ comp_id, skater_id, total }) => {
+    const season = compSeasonMap[comp_id];
+    if (!season) return;
+    if (!seasonBestBySkater[season]) seasonBestBySkater[season] = {};
+    if (!seasonBestBySkater[season][skater_id] || total > seasonBestBySkater[season][skater_id])
+      seasonBestBySkater[season][skater_id] = total;
+  });
+
+  /* Returns top-10 skater cards for a given filter value */
+  function getTopSkaters(filter) {
+    if (filter === 'all-time') {
+      return [...skaters]
+        .filter(s => s.personal_best_total > 0)
+        .sort((a, b) => b.personal_best_total - a.personal_best_total)
+        .slice(0, 10)
+        .map(s => ({ skater: s, score: s.personal_best_total, label: 'Personal Best' }));
+    }
+    if (filter === 'this-season') {
+      return [...skaters]
+        .filter(s => s.season_best_total > 0)
+        .sort((a, b) => b.season_best_total - a.season_best_total)
+        .slice(0, 10)
+        .map(s => ({ skater: s, score: s.season_best_total, label: 'Season Best' }));
+    }
+    /* Specific season — from results */
+    const bests = seasonBestBySkater[filter] || {};
+    return Object.entries(bests)
+      .map(([sid, score]) => ({ skater: skaterMap[sid], score }))
+      .filter(e => e.skater)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10)
+      .map(e => ({ ...e, label: 'Season Best' }));
+  }
+
+  function skaterGridHTML(items) {
+    if (!items.length) return '<p class="no-data">No data for this filter.</p>';
+    return `<div class="grid-5" id="top-skaters-grid">${items.map(({ skater: s, score, label }) => `
+      <a href="#/skater/${s.id}" class="skater-card">
+        ${s.photo_url
+          ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
+          : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
+        <div class="skater-card-body">
+          <p class="skater-card-name">${s.name}</p>
+          <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country || ''}</p>
+          <p class="skater-card-pb-label">${label}</p>
+          <p class="skater-card-pb">${score.toFixed(2)}</p>
+        </div>
+      </a>`).join('')}</div>`;
+  }
+
+  const hasSkaterData = skaters.some(s => s.personal_best_total > 0 || s.season_best_total > 0);
 
   const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
   const seasonBests = {};
@@ -162,54 +218,26 @@ async function renderHome() {
           </div>
         </section>` : ''}
 
-        ${featuredSkaters.length ? `
-        <!-- FEATURED SKATERS -->
+        ${hasSkaterData ? `
+        <!-- TOP SKATERS (filterable) -->
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
-            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
-            <h2 class="section-title">Top Skaters This Season</h2>
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
+              <h2 class="section-title">Top Skaters</h2>
+            </div>
+            <select id="top-skaters-filter" class="filter-select" aria-label="Filter top skaters">
+              <option value="this-season">This Season</option>
+              <option value="all-time">All Time</option>
+              ${seasons.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
           </div>
-          <div class="grid-5">
-            ${featuredSkaters.map(s => `
-              <a href="#/skater/${s.id}" class="skater-card">
-                ${s.photo_url
-                  ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
-                  : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
-                <div class="skater-card-body">
-                  <p class="skater-card-name">${s.name}</p>
-                  <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country||''}</p>
-                  ${s.season_best_total ? `
-                  <p class="skater-card-pb-label">Season Best</p>
-                  <p class="skater-card-pb">${s.season_best_total.toFixed(2)}</p>` : ''}
-                </div>
-              </a>`).join('')}
+          <div id="top-skaters-wrap">
+            ${skaterGridHTML(getTopSkaters('this-season'))}
           </div>
         </section>` : ''}
 
-        ${allTimeSkaters.length ? `
-        <!-- ALL TIME SKATERS -->
-        <section style="margin-bottom:var(--space-2xl)">
-          <div class="section-header">
-            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} All Time</p>
-            <h2 class="section-title">Top Skaters of All Time</h2>
-          </div>
-          <div class="grid-5">
-            ${allTimeSkaters.map(s => `
-              <a href="#/skater/${s.id}" class="skater-card">
-                ${s.photo_url
-                  ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
-                  : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
-                <div class="skater-card-body">
-                  <p class="skater-card-name">${s.name}</p>
-                  <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country||''}</p>
-                  <p class="skater-card-pb-label">Personal Best</p>
-                  <p class="skater-card-pb">${s.personal_best_total.toFixed(2)}</p>
-                </div>
-              </a>`).join('')}
-          </div>
-        </section>` : ''}
-
-        ${!recentComp && !featuredSkaters.length ? `
+        ${!recentComp && !hasSkaterData ? `
           <div class="not-configured">
             <h3>✦ Welcome to Under Review Skating</h3>
             <p>Connect your Google Sheet to see live leaderboards, skater profiles, and protocol sheets.</p>
@@ -220,4 +248,11 @@ async function renderHome() {
     </div>`;
 
   Sparkles.scatter(document.getElementById('hero-sf'), 22);
+
+  const filterEl = document.getElementById('top-skaters-filter');
+  if (filterEl) {
+    filterEl.addEventListener('change', () => {
+      document.getElementById('top-skaters-wrap').innerHTML = skaterGridHTML(getTopSkaters(filterEl.value));
+    });
+  }
 }
