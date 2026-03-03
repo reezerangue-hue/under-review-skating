@@ -10,12 +10,24 @@ async function renderHome() {
     SheetsDB.getResults(),
   ]);
 
-  const recentComp    = competitions[0] || null;
-  const recentResults = recentComp
-    ? results
-        .filter(r => r.competition_id === recentComp.id && r.segment === 'Free Skate')
-        .sort((a, b) => a.placement - b.placement)
-    : [];
+  const recentComp = competitions[0] || null;
+
+  /* Build combined SP+FS totals for the most recent competition */
+  const recentResults = (() => {
+    if (!recentComp) return [];
+    const compResults = results.filter(r => r.competition_id === recentComp.id && r.total_score);
+    const bySkater = {};
+    compResults.forEach(r => {
+      if (!bySkater[r.skater_id]) bySkater[r.skater_id] = { skater_id: r.skater_id, sp: null, fs: null };
+      if (r.segment === 'Short Program') bySkater[r.skater_id].sp = r.total_score;
+      if (r.segment === 'Free Skate')    bySkater[r.skater_id].fs = r.total_score;
+    });
+    return Object.values(bySkater)
+      .map(e => ({ ...e, combined: (e.sp || 0) + (e.fs || 0) }))
+      .filter(e => e.combined > 0)
+      .sort((a, b) => b.combined - a.combined)
+      .slice(0, 10);
+  })();
 
   const recentComps = competitions.slice(0, 6);
 
@@ -81,29 +93,27 @@ async function renderHome() {
               <thead><tr>
                 <th style="width:3rem">#</th>
                 <th>Skater</th>
-                <th style="text-align:right">TES</th>
-                <th style="text-align:right">PCS</th>
-                <th style="text-align:right">Ded</th>
+                <th style="text-align:right">SP</th>
+                <th style="text-align:right">FS</th>
                 <th style="text-align:right">Total</th>
               </tr></thead>
               <tbody>
-                ${recentResults.slice(0,10).map(r => {
+                ${recentResults.map((r, i) => {
                   const sk = skaterMap[r.skater_id];
-                  const pc = placeClass(r.placement);
+                  const pc = placeClass(i + 1);
                   return `<tr onclick="Router.go('/skater/${r.skater_id}')">
-                    <td class="place-cell ${pc}">${r.placement || '—'}</td>
+                    <td class="place-cell ${pc}">${i + 1}</td>
                     <td><a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk ? sk.name : 'Unknown'}</a>
                       ${sk ? `<span style="margin-left:6px;font-size:.8rem">${Nav.getFlagEmoji(sk.country_code)}</span>` : ''}
                     </td>
-                    <td class="score-cell">${r.technical_score ? r.technical_score.toFixed(2) : '—'}</td>
-                    <td class="score-cell">${r.component_score ? r.component_score.toFixed(2) : '—'}</td>
-                    <td class="score-cell" style="color:hsl(0,80%,70%)">${r.deductions ? '-'+r.deductions.toFixed(2) : '0.00'}</td>
-                    <td class="score-cell total">${r.total_score ? r.total_score.toFixed(2) : '—'}</td>
+                    <td class="score-cell">${r.sp ? r.sp.toFixed(2) : '—'}</td>
+                    <td class="score-cell">${r.fs ? r.fs.toFixed(2) : '—'}</td>
+                    <td class="score-cell total">${r.combined.toFixed(2)}</td>
                   </tr>`;
                 }).join('')}
               </tbody>
             </table>
-          </div>` : '<p class="no-data">No Free Skate results recorded yet.</p>'}
+          </div>` : '<p class="no-data">No results recorded yet.</p>'}
         </section>` : ''}
 
         ${seasonStandings.length ? `
