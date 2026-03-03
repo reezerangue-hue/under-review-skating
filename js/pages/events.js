@@ -19,12 +19,15 @@ async function renderEvents() {
     combined[key].total += r.total_score;
   });
 
-  /* Group by competition, sorted by combined total desc, top 10 */
   const byComp = {};
   Object.values(combined).forEach(e => {
     if (!byComp[e.competition_id]) byComp[e.competition_id] = [];
     byComp[e.competition_id].push(e);
   });
+
+  /* Unique filter values */
+  const seasons = [...new Set(competitions.filter(c => c.season).map(c => c.season))];
+  const levels  = [...new Set(competitions.filter(c => c.level).map(c => c.level))];
 
   function levelClass(l) { return 'level-' + (l || 'default').replace(/\s+/g, ''); }
   function placeClass(i) { if (i === 0) return 'r1'; if (i === 1) return 'r2'; if (i === 2) return 'r3'; return ''; }
@@ -32,6 +35,43 @@ async function renderEvents() {
     if (!d) return '';
     const dt = new Date(d);
     return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function compHTML(comp) {
+    const rows = (byComp[comp.id] || [])
+      .map(e => ({ ...e, skater: skaterMap[e.skater_id] }))
+      .filter(e => e.skater)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10);
+
+    return `
+      <section class="event-section" data-season="${comp.season || ''}" data-level="${comp.level || ''}" style="margin-bottom:var(--space-2xl)">
+        <div class="section-header">
+          <div>
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} ${formatDate(comp.date)}</p>
+            <h2 class="section-title">
+              <a href="#/competition/${comp.id}" style="color:inherit;text-decoration:none">${comp.name}</a>
+            </h2>
+          </div>
+          <a href="#/competition/${comp.id}" class="section-link">Full results →</a>
+        </div>
+        <div style="display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-md);flex-wrap:wrap">
+          <span class="level-badge ${levelClass(comp.level)}">${comp.level || 'Event'}</span>
+          ${comp.location ? `<span style="color:var(--text-muted);font-size:.82rem">${comp.location}</span>` : ''}
+        </div>
+        ${rows.length ? `
+        <div class="card" style="padding:var(--space-md)">
+          ${rows.map((e, i) => `
+            <div class="lb-row" onclick="Router.go('/skater/${e.skater_id}')" style="cursor:pointer">
+              <span class="lb-rank ${placeClass(i)}">${i + 1}</span>
+              <div class="lb-name">
+                <a href="#/skater/${e.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${e.skater.name}</a>
+              </div>
+              <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
+              <span class="lb-score">${e.total.toFixed(2)}</span>
+            </div>`).join('')}
+        </div>` : `<p class="no-data">No results recorded yet.</p>`}
+      </section>`;
   }
 
   app.innerHTML = `
@@ -46,42 +86,26 @@ async function renderEvents() {
           <h1 class="hero-title" style="font-size:clamp(2.5rem,10vw,6rem)">Events</h1>
         </section>
 
-        ${competitions.length ? competitions.map(comp => {
-          const rows = (byComp[comp.id] || [])
-            .map(e => ({ ...e, skater: skaterMap[e.skater_id] }))
-            .filter(e => e.skater)
-            .sort((a, b) => b.total - a.total)
-            .slice(0, 10);
+        ${competitions.length ? `
+        <!-- FILTERS -->
+        <div style="display:flex;gap:var(--space-sm);flex-wrap:wrap;margin-bottom:var(--space-xl);align-items:center">
+          <select id="events-season-filter" class="filter-select" aria-label="Filter by season">
+            <option value="">All Seasons</option>
+            ${seasons.map(s => `<option value="${s}">${s}</option>`).join('')}
+          </select>
+          <select id="events-level-filter" class="filter-select" aria-label="Filter by level">
+            <option value="">All Levels</option>
+            ${levels.map(l => `<option value="${l}">${l}</option>`).join('')}
+          </select>
+          <span id="events-count" style="font-size:.78rem;color:var(--text-muted);margin-left:auto">
+            ${competitions.length} event${competitions.length !== 1 ? 's' : ''}
+          </span>
+        </div>
 
-          return `
-          <section style="margin-bottom:var(--space-2xl)">
-            <div class="section-header">
-              <div>
-                <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} ${formatDate(comp.date)}</p>
-                <h2 class="section-title">
-                  <a href="#/competition/${comp.id}" style="color:inherit;text-decoration:none">${comp.name}</a>
-                </h2>
-              </div>
-              <a href="#/competition/${comp.id}" class="section-link">Full results →</a>
-            </div>
-            <div style="display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-md);flex-wrap:wrap">
-              <span class="level-badge ${levelClass(comp.level)}">${comp.level || 'Event'}</span>
-              ${comp.location ? `<span style="color:var(--text-muted);font-size:.82rem">${comp.location}</span>` : ''}
-            </div>
-            ${rows.length ? `
-            <div class="card" style="padding:var(--space-md)">
-              ${rows.map((e, i) => `
-                <div class="lb-row" onclick="Router.go('/skater/${e.skater_id}')" style="cursor:pointer">
-                  <span class="lb-rank ${placeClass(i)}">${i + 1}</span>
-                  <div class="lb-name">
-                    <a href="#/skater/${e.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${e.skater.name}</a>
-                  </div>
-                  <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
-                  <span class="lb-score">${e.total.toFixed(2)}</span>
-                </div>`).join('')}
-            </div>` : `<p class="no-data">No results recorded yet.</p>`}
-          </section>`;
-        }).join('') : `
+        <!-- EVENT LIST -->
+        <div id="events-list">
+          ${competitions.map(compHTML).join('')}
+        </div>` : `
           <div class="not-configured" style="margin:var(--space-2xl) auto;text-align:center">
             <h3>✦ No events yet</h3>
             <p>Add competitions and results to your Google Sheet to see them here.</p>
@@ -91,4 +115,25 @@ async function renderEvents() {
     </div>`;
 
   Sparkles.scatter(document.getElementById('events-sf'), 16);
+
+  const seasonEl = document.getElementById('events-season-filter');
+  const levelEl  = document.getElementById('events-level-filter');
+  const countEl  = document.getElementById('events-count');
+
+  function applyFilters() {
+    const season = seasonEl.value;
+    const level  = levelEl.value;
+    let visible = 0;
+    document.querySelectorAll('.event-section').forEach(section => {
+      const match =
+        (!season || section.dataset.season === season) &&
+        (!level  || section.dataset.level  === level);
+      section.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    countEl.textContent = `${visible} event${visible !== 1 ? 's' : ''}`;
+  }
+
+  if (seasonEl) seasonEl.addEventListener('change', applyFilters);
+  if (levelEl)  levelEl.addEventListener('change', applyFilters);
 }
