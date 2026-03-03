@@ -170,7 +170,7 @@ function renderElemCard(elem, landingRates) {
 
         <div class="elem-tags">
           ${elem.execution ? `<span class="exec-badge exec-${execKey}">${elem.execution}</span>` : ''}
-          ${showPVE ? `<span class="pve-badge ${pve==='Downgraded'?'pve-downgraded':'pve-executed'}">${pve==='Downgraded'?'▼ Downgraded':'✓ Executed'}</span>` : ''}
+          ${showPVE ? `<span class="pve-badge ${pve==='Downgraded'?'pve-downgraded':pve==='Fall'?'pve-fall':'pve-executed'}">${pve==='Downgraded'?'▼ Downgraded':pve==='Fall'?'✕ Fall':'✓ Executed'}</span>` : ''}
         </div>
 
         ${isUC && rates ? `

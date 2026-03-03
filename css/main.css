@@ -578,6 +578,7 @@ p  { line-height: 1.65; }
 .pve-badge       { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 3px; }
 .pve-downgraded  { color: hsl(278,100%,76%); }
 .pve-executed    { color: hsl(140,100%,70%); }
+.pve-fall        { color: hsl(0,100%,68%); }
 
 .uc-landing       { font-size: 0.7rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 3px; min-width: 100px; }
 .uc-landing-label { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
