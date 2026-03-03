@@ -431,13 +431,19 @@ p  { line-height: 1.65; }
 
 /* Execution badges */
 .exec-badge { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
-.exec-Landed         { background:rgba(80,255,150,0.18); border:1px solid rgba(80,255,150,0.32);  color:hsl(140,100%,74%); }
-.exec-Fall           { background:rgba(255,70,70,0.18);  border:1px solid rgba(255,70,70,0.32);   color:hsl(0,100%,74%); }
-.exec-StepOut        { background:rgba(255,185,40,0.18); border:1px solid rgba(255,185,40,0.32);  color:hsl(42,100%,74%); }
-.exec-Downgraded     { background:rgba(180,80,255,0.18); border:1px solid rgba(180,80,255,0.32);  color:hsl(278,100%,78%); }
-.exec-UnclearEdge    { background:rgba(80,190,255,0.18); border:1px solid rgba(80,190,255,0.32);  color:hsl(202,100%,78%); }
-.exec-RotationalFall { background:rgba(255,120,40,0.18); border:1px solid rgba(255,120,40,0.32);  color:hsl(22,100%,74%); }
-.exec-default        { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);  color:var(--text-secondary); }
+.exec-Landed             { background:rgba(80,255,150,0.18); border:1px solid rgba(80,255,150,0.32);  color:hsl(140,100%,74%); }
+.exec-Clean              { background:rgba(80,255,150,0.18); border:1px solid rgba(80,255,150,0.32);  color:hsl(140,100%,74%); }
+.exec-Fall               { background:rgba(255,70,70,0.18);  border:1px solid rgba(255,70,70,0.32);   color:hsl(0,100%,74%); }
+.exec-StepOut            { background:rgba(255,185,40,0.18); border:1px solid rgba(255,185,40,0.32);  color:hsl(42,100%,74%); }
+.exec-Downgraded         { background:rgba(180,80,255,0.18); border:1px solid rgba(180,80,255,0.32);  color:hsl(278,100%,78%); }
+.exec-UnclearEdge        { background:rgba(80,190,255,0.18); border:1px solid rgba(80,190,255,0.32);  color:hsl(202,100%,78%); }
+.exec-IncorrectEdge      { background:rgba(80,190,255,0.18); border:1px solid rgba(80,190,255,0.32);  color:hsl(202,100%,78%); }
+.exec-RotationalFall     { background:rgba(255,120,40,0.18); border:1px solid rgba(255,120,40,0.32);  color:hsl(22,100%,74%); }
+.exec-Quarter            { background:rgba(255,200,60,0.18); border:1px solid rgba(255,200,60,0.32);  color:hsl(48,100%,74%); }
+.exec-Underrotated       { background:rgba(255,150,80,0.18); border:1px solid rgba(255,150,80,0.32);  color:hsl(30,100%,74%); }
+.exec-Invalid            { background:rgba(255,50,100,0.18); border:1px solid rgba(255,50,100,0.32);  color:hsl(345,100%,74%); }
+.exec-MissedRequirement  { background:rgba(160,80,255,0.18); border:1px solid rgba(160,80,255,0.32);  color:hsl(268,100%,78%); }
+.exec-default            { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);  color:var(--text-secondary); }
 
 /* ====================================================
    HERO

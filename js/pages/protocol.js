@@ -140,7 +140,8 @@ function renderElemCard(elem, landingRates) {
   const goe   = elem.goe;
   const rates = isUC ? landingRates[elem.element_code] : null;
 
-  const execKey  = (elem.execution || '').replace(/\s+/g, '');
+  const execLabels = (elem.execution || '').split(',').map(s => s.trim()).filter(Boolean)
+    .map(label => label === 'Landed' ? 'Clean' : label);
   const goeSign  = goe > 0 ? '+' : '';
   const goeClass = goe > 0 ? 'goe-pos' : goe < 0 ? 'goe-neg' : 'goe-zero';
   const pve      = elem.planned_vs_executed;
@@ -169,7 +170,12 @@ function renderElemCard(elem, landingRates) {
         ${elem.element_name ? `<p class="elem-name">${elem.element_name}</p>` : ''}
 
         <div class="elem-tags">
-          ${elem.execution ? `<span class="exec-badge exec-${execKey}">${elem.execution}</span>` : ''}
+          ${execLabels.map(label => {
+            const key = label.replace(/\s+/g, '');
+            const known = ['Clean','Fall','StepOut','Downgraded','UnclearEdge','IncorrectEdge','RotationalFall','Quarter','Underrotated','Invalid','MissedRequirement'];
+            const cls = known.includes(key) ? `exec-${key}` : 'exec-default';
+            return `<span class="exec-badge ${cls}">${label}</span>`;
+          }).join('')}
           ${showPVE ? `<span class="pve-badge ${pve==='Downgraded'?'pve-downgraded':pve==='Fall'?'pve-fall':'pve-executed'}">${pve==='Downgraded'?'▼ Downgraded':pve==='Fall'?'✕ Fall':'✓ Executed'}</span>` : ''}
         </div>
 
