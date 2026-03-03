@@ -438,11 +438,19 @@ p  { line-height: 1.65; }
 
 /* Level badges */
 .level-badge { display: inline-block; padding: 2px 10px; border-radius: var(--radius-full); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.11em; text-transform: uppercase; }
-.level-Olympics  { background:rgba(255,210,0,0.18);  border:1px solid rgba(255,210,0,0.4);   color:hsl(50,100%,78%); }
-.level-Worlds    { background:rgba(180,100,255,0.18);border:1px solid rgba(180,100,255,0.4); color:hsl(280,100%,80%); }
-.level-GrandPrix { background:rgba(80,180,255,0.18); border:1px solid rgba(80,180,255,0.4);  color:hsl(204,100%,80%); }
-.level-Nationals { background:rgba(80,255,180,0.15); border:1px solid rgba(80,255,180,0.38); color:hsl(155,100%,78%); }
-.level-default   { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:var(--text-secondary); }
+.level-Olympics             { background:rgba(255,210,0,0.18);   border:1px solid rgba(255,210,0,0.4);    color:hsl(50,100%,78%); }
+.level-YouthOlympics        { background:rgba(255,210,0,0.12);   border:1px solid rgba(255,210,0,0.3);    color:hsl(50,100%,72%); }
+.level-Worlds               { background:rgba(180,100,255,0.18); border:1px solid rgba(180,100,255,0.4);  color:hsl(280,100%,80%); }
+.level-Championships        { background:rgba(160,80,255,0.18);  border:1px solid rgba(160,80,255,0.4);   color:hsl(270,100%,80%); }
+.level-JuniorChampionships  { background:rgba(140,60,255,0.15);  border:1px solid rgba(140,60,255,0.35);  color:hsl(265,100%,78%); }
+.level-GrandPrix            { background:rgba(80,180,255,0.18);  border:1px solid rgba(80,180,255,0.4);   color:hsl(204,100%,80%); }
+.level-JuniorGrandPrix      { background:rgba(60,160,255,0.15);  border:1px solid rgba(60,160,255,0.35);  color:hsl(208,100%,78%); }
+.level-Challenger           { background:rgba(80,220,200,0.15);  border:1px solid rgba(80,220,200,0.35);  color:hsl(174,100%,76%); }
+.level-TeamTrophy           { background:rgba(255,140,80,0.15);  border:1px solid rgba(255,140,80,0.35);  color:hsl(25,100%,76%); }
+.level-International        { background:rgba(80,200,120,0.15);  border:1px solid rgba(80,200,120,0.35);  color:hsl(145,80%,74%); }
+.level-JuniorInternational  { background:rgba(60,180,100,0.13);  border:1px solid rgba(60,180,100,0.3);   color:hsl(145,70%,70%); }
+.level-Nationals            { background:rgba(80,255,180,0.15);  border:1px solid rgba(80,255,180,0.38);  color:hsl(155,100%,78%); }
+.level-default              { background:rgba(255,255,255,0.1);  border:1px solid rgba(255,255,255,0.2);  color:var(--text-secondary); }
 
 /* Execution badges */
 .exec-badge { display: inline-block; padding: 2px 8px; border-radius: var(--radius-full); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
