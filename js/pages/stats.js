@@ -54,6 +54,34 @@ async function renderStats() {
   const ucFreqList = Object.entries(ucFreq).sort((a,b)=>b[1]-a[1]).slice(0,15)
     .map(([code,count])=>({ label:code, value:count, decimals:0 }));
 
+  /* Landing rate by element — one bucket per UC element code */
+  const ucByElem = {};
+  elements.filter(e => e.is_ultra_c).forEach(e => {
+    if (!ucByElem[e.element_code]) ucByElem[e.element_code] = { name: e.element_name || '', skaters: {} };
+    if (!ucByElem[e.element_code].skaters[e.skater_id])
+      ucByElem[e.element_code].skaters[e.skater_id] = { total: 0, landed: 0 };
+    ucByElem[e.element_code].skaters[e.skater_id].total++;
+    if (e.execution === 'Landed') ucByElem[e.element_code].skaters[e.skater_id].landed++;
+  });
+
+  const elementBreakdown = Object.entries(ucByElem)
+    .map(([code, { name, skaters }]) => {
+      const totalAttempts = Object.values(skaters).reduce((s, v) => s + v.total, 0);
+      const skaterList = Object.entries(skaters)
+        .filter(([, v]) => v.total >= 2)
+        .map(([sid, v]) => ({
+          skater: skaterMap[sid],
+          total:  v.total,
+          landed: v.landed,
+          rate:   v.total ? v.landed / v.total : 0,
+        }))
+        .filter(e => e.skater)
+        .sort((a, b) => b.rate - a.rate || b.total - a.total);
+      return { code, name, skaterList, totalAttempts };
+    })
+    .filter(e => e.skaterList.length > 0)
+    .sort((a, b) => b.totalAttempts - a.totalAttempts);
+
   /* Clutch ratings */
   const clutch = skaters
     .filter(s=>s.personal_best_total>0)
@@ -159,6 +187,44 @@ async function renderStats() {
                 </div>
                 <span class="lb-score" style="font-size:1rem">${pct(e.rate)}</span>
                 <span class="lb-country">${e.landed}/${e.total}</span>
+              </div>`).join('')}
+          </div>
+        </section>` : ''}
+
+        <!-- LANDING RATE BY ELEMENT -->
+        ${elementBreakdown.length ? `
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} By Jump</p>
+              <h2 class="section-title">Landing Rate by Element</h2>
+            </div>
+          </div>
+          <p style="color:var(--text-secondary);font-size:.82rem;margin-bottom:var(--space-lg)">
+            Who lands each Ultra-C jump most consistently · Minimum 2 attempts per skater
+          </p>
+          <div class="grid-2">
+            ${elementBreakdown.map(elem => `
+              <div class="card" style="padding:var(--space-lg)">
+                <div style="display:flex;align-items:baseline;gap:var(--space-md);margin-bottom:var(--space-md);flex-wrap:wrap">
+                  <span style="font-family:var(--font-display);font-style:italic;font-size:2.4rem;font-weight:600;line-height:1">${elem.code}</span>
+                  ${elem.name ? `<span style="font-size:.8rem;color:var(--text-secondary)">${elem.name}</span>` : ''}
+                  <span style="margin-left:auto;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">${elem.totalAttempts} attempt${elem.totalAttempts !== 1 ? 's' : ''}</span>
+                </div>
+                ${elem.skaterList.map((e, i) => `
+                  <div class="lb-row" style="padding:6px var(--space-sm)">
+                    <span class="lb-rank ${pc(i)}" style="font-size:.95rem">${i + 1}</span>
+                    <div class="lb-name" style="font-size:.88rem">
+                      <a href="#/skater/${e.skater.id}" style="font-weight:500">${e.skater.name}</a>
+                    </div>
+                    <span style="font-size:.75rem;color:var(--text-muted);flex-shrink:0">${e.landed}/${e.total}</span>
+                    <div style="flex:1;max-width:120px;min-width:60px">
+                      <div class="landing-bar" style="height:6px">
+                        <div class="landing-fill" style="width:${Math.round(e.rate * 100)}%"></div>
+                      </div>
+                    </div>
+                    <span class="lb-score" style="font-size:.95rem;min-width:3.5rem;text-align:right">${pct(e.rate)}</span>
+                  </div>`).join('')}
               </div>`).join('')}
           </div>
         </section>` : ''}
