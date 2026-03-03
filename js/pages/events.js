@@ -5,8 +5,9 @@
 async function renderEvents() {
   const app = document.getElementById('app');
 
-  const { skaters, competitions, results } = await SheetsDB.getAllData();
+  const { skaters, competitions: rawComps, results } = await SheetsDB.getAllData();
 
+  const competitions = [...rawComps].sort((a, b) => new Date(b.date) - new Date(a.date));
   const skaterMap = Object.fromEntries(skaters.map(s => [s.id, s]));
 
   /* Build combined score per skater per competition */
