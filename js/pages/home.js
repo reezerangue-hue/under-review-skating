@@ -106,7 +106,7 @@ async function renderHome() {
   });
   const seasonStandings = Object.values(seasonBests)
     .map(e => ({ skater: skaterMap[e.sid], score: e.score, sid: e.sid }))
-    .filter(e => e.skater)
+    .filter(e => e.skater && e.skater.season_best_total > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 10);
 
