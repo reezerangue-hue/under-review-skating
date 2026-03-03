@@ -34,7 +34,7 @@ async function renderHome() {
   const featuredSkaters = [...skaters]
     .filter(s => s.season_best_total > 0)
     .sort((a, b) => b.season_best_total - a.season_best_total)
-    .slice(0, 8);
+    .slice(0, 10);
 
   const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
   const seasonBests = {};
@@ -164,7 +164,7 @@ async function renderHome() {
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
             <h2 class="section-title">Top Skaters This Season</h2>
           </div>
-          <div class="grid-4">
+          <div class="grid-5">
             ${featuredSkaters.map(s => `
               <a href="#/skater/${s.id}" class="skater-card">
                 ${s.photo_url
