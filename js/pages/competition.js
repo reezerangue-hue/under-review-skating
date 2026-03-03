@@ -201,8 +201,8 @@ async function renderCompetition({ id }) {
     </div>
 
     <!-- DOT POPUP -->
-    <div id="dot-popup-backdrop" class="dot-popup-backdrop hidden"></div>
-    <div id="dot-popup-card" class="dot-popup-card hidden" style="position:fixed">
+    <div id="dot-popup-backdrop" class="dot-popup-backdrop" style="display:none"></div>
+    <div id="dot-popup-card" class="dot-popup-card" style="display:none">
       <button id="dot-popup-close" class="dot-popup-close" aria-label="Close">✕</button>
       <div id="dot-popup-img-wrap"></div>
       <p id="dot-popup-name" class="dot-popup-name"></p>
@@ -227,8 +227,8 @@ async function renderCompetition({ id }) {
     if (chartEl) {
       Charts.drawDotChart(chartEl, distData, {
         onDotClick(r) {
-          document.getElementById('dot-popup-backdrop').classList.remove('hidden');
-          document.getElementById('dot-popup-card').classList.remove('hidden');
+          document.getElementById('dot-popup-backdrop').style.display = 'block';
+          document.getElementById('dot-popup-card').style.display     = 'flex';
           document.getElementById('dot-popup-img-wrap').innerHTML = r.photo_url
             ? `<img class="dot-popup-photo" src="${r.photo_url}" alt="${r.skater_name}">`
             : `<div class="dot-popup-placeholder">✦</div>`;
@@ -242,9 +242,9 @@ async function renderCompetition({ id }) {
   }
 
   function closePopup() {
-    document.getElementById('dot-popup-backdrop').classList.add('hidden');
-    document.getElementById('dot-popup-card').classList.add('hidden');
+    document.getElementById('dot-popup-backdrop').style.display = 'none';
+    document.getElementById('dot-popup-card').style.display     = 'none';
   }
   document.getElementById('dot-popup-backdrop').addEventListener('click', closePopup);
-  document.getElementById('dot-popup-close').addEventListener('click', closePopup);
+  document.getElementById('dot-popup-close').addEventListener('click', e => { e.stopPropagation(); closePopup(); });
 }
