@@ -156,10 +156,11 @@ async function renderSkater({ id }) {
           </div>
           <div style="display:flex;flex-direction:column;gap:var(--space-md)">
             ${allComps.filter(c => resultsByComp[c.id]).map(comp => {
-              const cr   = resultsByComp[comp.id];
-              const sp   = cr.find(r => r.segment==='Short Program');
-              const fs   = cr.find(r => r.segment==='Free Skate');
-              const best = cr.reduce((b,r)=>r.placement&&r.placement<b?r.placement:b,999);
+              const cr    = resultsByComp[comp.id];
+              const sp    = cr.find(r => r.segment==='Short Program');
+              const fs    = cr.find(r => r.segment==='Free Skate');
+              const entry = cr.some(r => r.segment==='Entry') && !sp && !fs;
+              const best  = cr.reduce((b,r)=>r.placement&&r.placement<b?r.placement:b,999);
               return `
                 <a href="#/competition/${comp.id}" class="comp-card">
                   <div style="display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;justify-content:space-between">
@@ -173,6 +174,7 @@ async function renderSkater({ id }) {
                       </div>
                     </div>
                     <div class="score-row" style="gap:var(--space-lg)">
+                      ${entry?`<span class="exec-badge exec-default" style="font-size:.7rem;letter-spacing:.12em">Entered</span>`:''}
                       ${sp?`<div class="score-block"><span class="score-label">SP</span><span class="score-value sm">${sp.total_score.toFixed(2)}</span></div>`:''}
                       ${fs?`<div class="score-block"><span class="score-label">FS</span><span class="score-value sm">${fs.total_score.toFixed(2)}</span></div>`:''}
                       ${sp&&fs?`<div class="score-block"><span class="score-label">Total</span><span class="score-value">${(sp.total_score+fs.total_score).toFixed(2)}</span></div>`:''}

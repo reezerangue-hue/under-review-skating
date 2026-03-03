@@ -23,8 +23,10 @@ async function renderCompetition({ id }) {
 
   const skaterMap = Object.fromEntries(skaters.map(s => [s.id, s]));
 
-  const spResults = results.filter(r => r.segment==='Short Program').sort((a,b)=>(a.placement||99)-(b.placement||99));
-  const fsResults = results.filter(r => r.segment==='Free Skate').sort((a,b)=>(a.placement||99)-(b.placement||99));
+  const spResults    = results.filter(r => r.segment==='Short Program').sort((a,b)=>(a.placement||99)-(b.placement||99));
+  const fsResults    = results.filter(r => r.segment==='Free Skate').sort((a,b)=>(a.placement||99)-(b.placement||99));
+  const entryResults = [...new Map(results.filter(r => r.segment==='Entry').map(r => [r.skater_id, r])).values()]
+    .sort((a,b) => (skaterMap[a.skater_id]?.name||'').localeCompare(skaterMap[b.skater_id]?.name||''));
 
   /* Fetch all elements for this competition */
   const allElements = (await Promise.all(results.map(r => SheetsDB.getElements(r.id)))).flat();
@@ -179,23 +181,46 @@ async function renderCompetition({ id }) {
           <div class="card"><div class="chart-wrap" id="dist-chart"></div></div>
         </section>` : ''}
 
+        <!-- ENTRIES -->
+        ${entryResults.length ? `
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Upcoming</p>
+            <h2 class="section-title">Entries</h2>
+          </div>
+          <div class="card" style="padding:var(--space-md)">
+            ${entryResults.map(r => {
+              const sk = skaterMap[r.skater_id];
+              return `<div class="lb-row" onclick="Router.go('/skater/${r.skater_id}')" style="cursor:pointer">
+                <div class="lb-name">
+                  <a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk ? sk.name : 'Unknown'}</a>
+                </div>
+                <span class="lb-country">${sk ? Nav.getFlagEmoji(sk.country_code) : ''}</span>
+                <span class="lb-country" style="font-size:.74rem;opacity:.6">${sk ? sk.country || '' : ''}</span>
+              </div>`;
+            }).join('')}
+          </div>
+        </section>` : ''}
+
         <!-- SHORT PROGRAM -->
+        ${spResults.length ? `
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Segment</p>
             <h2 class="section-title">Short Program</h2>
           </div>
           ${resultTable(spResults,'Short Program')}
-        </section>
+        </section>` : ''}
 
         <!-- FREE SKATE -->
+        ${fsResults.length ? `
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Segment</p>
             <h2 class="section-title">Free Skate</h2>
           </div>
           ${resultTable(fsResults,'Free Skate')}
-        </section>
+        </section>` : ''}
 
       </div>
     </div>
