@@ -20,8 +20,8 @@ async function renderHome() {
   const recentComps = competitions.slice(0, 6);
 
   const featuredSkaters = [...skaters]
-    .filter(s => s.personal_best_total > 0)
-    .sort((a, b) => b.personal_best_total - a.personal_best_total)
+    .filter(s => s.season_best_total > 0)
+    .sort((a, b) => b.season_best_total - a.season_best_total)
     .slice(0, 8);
 
   const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
@@ -152,7 +152,7 @@ async function renderHome() {
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
-            <h2 class="section-title">Top Skaters</h2>
+            <h2 class="section-title">Top Skaters This Season</h2>
           </div>
           <div class="grid-4">
             ${featuredSkaters.map(s => `
