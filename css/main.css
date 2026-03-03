@@ -20,11 +20,12 @@
   --glass-shadow: 0 8px 32px rgba(255, 255, 255, 0.12);
   --glass-blur:   blur(16px);
 
-  --text-primary:   rgba(255, 255, 255, 0.96);
-  --text-secondary: rgba(255, 255, 255, 0.68);
-  --text-muted:     rgba(255, 255, 255, 0.42);
+  /* Light mode — dark indigo text for readability over pastel gradient */
+  --text-primary:   rgba(18, 10, 55, 0.90);
+  --text-secondary: rgba(18, 10, 55, 0.62);
+  --text-muted:     rgba(18, 10, 55, 0.40);
 
-  --accent-glow: 0 0 24px rgba(255, 255, 255, 0.45);
+  --accent-glow: 0 0 24px rgba(18, 10, 55, 0.25);
 
   --radius-sm:   8px;
   --radius-md:   16px;
@@ -46,6 +47,11 @@ body.dark {
   --glass-bg:     rgba(0, 0, 0, 0.22);
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  /* Dark mode — restore white text */
+  --text-primary:   rgba(255, 255, 255, 0.96);
+  --text-secondary: rgba(255, 255, 255, 0.68);
+  --text-muted:     rgba(255, 255, 255, 0.42);
+  --accent-glow:    0 0 24px rgba(255, 255, 255, 0.45);
 }
 
 /* ---- Reset ---- */
