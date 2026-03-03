@@ -1,0 +1,18 @@
+/**
+ * Under Review Skating — Application Bootstrap
+ */
+(function init() {
+  Nav.render();
+
+  Router.add('/',                    () => renderHome());
+  Router.add('/skater/:id',          ({ id })        => renderSkater({ id }));
+  Router.add('/competition/:id',     ({ id })        => renderCompetition({ id }));
+  Router.add('/protocol/:result_id', ({ result_id }) => renderProtocol({ result_id }));
+  Router.add('/stats',               () => renderStats());
+
+  Router.init();
+
+  if (SheetsDB.isConfigured()) {
+    SheetsDB.init().catch(() => {});
+  }
+})();

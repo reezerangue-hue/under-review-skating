@@ -1,0 +1,185 @@
+/**
+ * Under Review Skating — Home / Competition Hub page
+ */
+async function renderHome() {
+  const app = document.getElementById('app');
+
+  const [competitions, skaters, results] = await Promise.all([
+    SheetsDB.getCompetitions(),
+    SheetsDB.getSkaters(),
+    SheetsDB.getResults(),
+  ]);
+
+  const recentComp    = competitions[0] || null;
+  const recentResults = recentComp
+    ? results
+        .filter(r => r.competition_id === recentComp.id && r.segment === 'Free Skate')
+        .sort((a, b) => a.placement - b.placement)
+    : [];
+
+  const recentComps = competitions.slice(0, 6);
+
+  const featuredSkaters = [...skaters]
+    .filter(s => s.personal_best_total > 0)
+    .sort((a, b) => b.personal_best_total - a.personal_best_total)
+    .slice(0, 8);
+
+  const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
+  const seasonBests = {};
+  results.forEach(r => {
+    if (!r.total_score) return;
+    if (!seasonBests[r.skater_id] || r.total_score > seasonBests[r.skater_id].score)
+      seasonBests[r.skater_id] = { score: r.total_score, sid: r.skater_id };
+  });
+  const seasonStandings = Object.values(seasonBests)
+    .map(e => ({ skater: skaterMap[e.sid], score: e.score, sid: e.sid }))
+    .filter(e => e.skater)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+
+  function levelClass(l) { return 'level-' + (l || 'default').replace(/\s+/g, ''); }
+  function placeClass(p) { if (p===1) return 'gold'; if (p===2) return 'silver'; if (p===3) return 'bronze'; return ''; }
+  function formatDate(d) {
+    if (!d) return '';
+    const dt = new Date(d);
+    return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  app.innerHTML = `
+    <div class="page-enter">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="sparkle-field" id="hero-sf"></div>
+        <p class="hero-eyebrow">${Sparkles.html('sparkle-sm')} Live Scores &amp; Statistics ${Sparkles.html('sparkle-sm')}</p>
+        <h1 class="hero-title">Under<br>Review</h1>
+        <p class="hero-sub">Figure skating scores, protocol sheets, and analytics — all in one place.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+          <a href="#/stats" class="btn">Season Statistics</a>
+          ${recentComp ? `<a href="#/competition/${recentComp.id}" class="btn">Latest Event</a>` : ''}
+        </div>
+      </section>
+
+      <div class="container">
+
+        ${recentComp ? `
+        <!-- LIVE LEADERBOARD -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Most Recent</p>
+              <h2 class="section-title">${recentComp.name}</h2>
+            </div>
+            <a href="#/competition/${recentComp.id}" class="section-link">Full results →</a>
+          </div>
+          <div style="display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-md);flex-wrap:wrap">
+            <span class="level-badge ${levelClass(recentComp.level)}">${recentComp.level || 'Event'}</span>
+            <span style="color:var(--text-muted);font-size:.82rem">${recentComp.location ? recentComp.location + ' &middot; ' : ''}${formatDate(recentComp.date)}</span>
+          </div>
+          ${recentResults.length ? `
+          <div class="table-wrap">
+            <table class="data-table" aria-label="Recent competition results">
+              <thead><tr>
+                <th style="width:3rem">#</th>
+                <th>Skater</th>
+                <th style="text-align:right">TES</th>
+                <th style="text-align:right">PCS</th>
+                <th style="text-align:right">Ded</th>
+                <th style="text-align:right">Total</th>
+              </tr></thead>
+              <tbody>
+                ${recentResults.slice(0,10).map(r => {
+                  const sk = skaterMap[r.skater_id];
+                  const pc = placeClass(r.placement);
+                  return `<tr onclick="Router.go('/skater/${r.skater_id}')">
+                    <td class="place-cell ${pc}">${r.placement || '—'}</td>
+                    <td><a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk ? sk.name : 'Unknown'}</a>
+                      ${sk ? `<span style="margin-left:6px;font-size:.8rem">${Nav.getFlagEmoji(sk.country_code)}</span>` : ''}
+                    </td>
+                    <td class="score-cell">${r.technical_score ? r.technical_score.toFixed(2) : '—'}</td>
+                    <td class="score-cell">${r.component_score ? r.component_score.toFixed(2) : '—'}</td>
+                    <td class="score-cell" style="color:hsl(0,80%,70%)">${r.deductions ? '-'+r.deductions.toFixed(2) : '0.00'}</td>
+                    <td class="score-cell total">${r.total_score ? r.total_score.toFixed(2) : '—'}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>` : '<p class="no-data">No Free Skate results recorded yet.</p>'}
+        </section>` : ''}
+
+        ${seasonStandings.length ? `
+        <!-- SEASON STANDINGS -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Season</p>
+              <h2 class="section-title">Season Standings</h2>
+            </div>
+            <a href="#/stats" class="section-link">Full stats →</a>
+          </div>
+          <div class="card" style="padding:var(--space-md)">
+            ${seasonStandings.map((e, i) => `
+              <div class="lb-row" onclick="Router.go('/skater/${e.sid}')" style="cursor:pointer">
+                <span class="lb-rank ${i<3?'r'+(i+1):''}">${i+1}</span>
+                <div class="lb-name"><a href="#/skater/${e.sid}" onclick="event.stopPropagation()">${e.skater.name}</a></div>
+                <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)} ${e.skater.country||''}</span>
+                <span class="lb-score">${e.score.toFixed(2)}</span>
+              </div>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${recentComps.length ? `
+        <!-- RECENT EVENTS -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Events</p>
+            <h2 class="section-title">Recent Competitions</h2>
+          </div>
+          <div class="grid-3">
+            ${recentComps.map(c => `
+              <a href="#/competition/${c.id}" class="comp-card">
+                <p class="comp-card-name">${c.name}</p>
+                <div class="comp-card-meta">
+                  <span class="level-badge ${levelClass(c.level)}">${c.level||'Event'}</span>
+                  <span>${c.location||''}</span>
+                  <span>${formatDate(c.date)}</span>
+                </div>
+              </a>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${featuredSkaters.length ? `
+        <!-- FEATURED SKATERS -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
+            <h2 class="section-title">Top Skaters</h2>
+          </div>
+          <div class="grid-4">
+            ${featuredSkaters.map(s => `
+              <a href="#/skater/${s.id}" class="skater-card">
+                ${s.photo_url
+                  ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
+                  : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
+                <div class="skater-card-body">
+                  <p class="skater-card-name">${s.name}</p>
+                  <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country||''}</p>
+                  ${s.personal_best_total ? `
+                  <p class="skater-card-pb-label">Personal Best</p>
+                  <p class="skater-card-pb">${s.personal_best_total.toFixed(2)}</p>` : ''}
+                </div>
+              </a>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${!recentComp && !featuredSkaters.length ? `
+          <div class="not-configured">
+            <h3>✦ Welcome to Under Review Skating</h3>
+            <p>Connect your Google Sheet to see live leaderboards, skater profiles, and protocol sheets.</p>
+            <p>Edit <code>js/config.js</code> with your Sheet ID and API key.</p>
+          </div>` : ''}
+
+      </div>
+    </div>`;
+
+  Sparkles.scatter(document.getElementById('hero-sf'), 22);
+}
