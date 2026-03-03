@@ -92,10 +92,14 @@ async function renderCompetition({ id }) {
       </div>`;
   }
 
-  const distData = [...spResults,...fsResults]
-    .filter(r=>r.total_score>0)
-    .sort((a,b)=>b.total_score-a.total_score)
-    .map(r=>({ skater_name:skaterMap[r.skater_id]?.name||'Unknown', total_score:r.total_score }));
+  /* Combined SP+FS total per skater for the score distribution chart */
+  const combinedTotals = {};
+  [...spResults, ...fsResults].filter(r => r.total_score > 0).forEach(r => {
+    combinedTotals[r.skater_id] = (combinedTotals[r.skater_id] || 0) + r.total_score;
+  });
+  const distData = Object.entries(combinedTotals)
+    .map(([sid, total_score]) => ({ skater_name: skaterMap[sid]?.name || 'Unknown', total_score }))
+    .sort((a, b) => b.total_score - a.total_score);
 
   app.innerHTML = `
     <div class="page-enter">
