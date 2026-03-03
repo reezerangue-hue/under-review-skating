@@ -21,9 +21,10 @@ const Nav = (() => {
           ${Sparkles.html('sparkle-sm')} Under Review ${Sparkles.html('sparkle-sm')}
         </a>
         <nav class="nav-links" aria-label="Primary">
-          <a href="#/"       class="nav-link" data-route="home">Home</a>
-          <a href="#/events" class="nav-link" data-route="events">Events</a>
-          <a href="#/stats"  class="nav-link" data-route="stats">Statistics</a>
+          <a href="#/"        class="nav-link" data-route="home">Home</a>
+          <a href="#/events"  class="nav-link" data-route="events">Events</a>
+          <a href="#/skaters" class="nav-link" data-route="skaters">Skaters</a>
+          <a href="#/stats"   class="nav-link" data-route="stats">Statistics</a>
         </nav>
         <div class="nav-actions">
           <div class="search-wrap">
@@ -53,8 +54,9 @@ const Nav = (() => {
       const route  = a.dataset.route;
       const active =
         (route === 'home'   && (hash === '#/' || hash === '#')) ||
-        (route === 'events' && hash.startsWith('#/events')) ||
-        (route === 'stats'  && hash.startsWith('#/stats'));
+        (route === 'events'  && hash.startsWith('#/events')) ||
+        (route === 'skaters' && hash.startsWith('#/skaters')) ||
+        (route === 'stats'   && hash.startsWith('#/stats'));
       a.classList.toggle('active', active);
     });
   }

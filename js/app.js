@@ -10,6 +10,7 @@
   Router.add('/protocol/:result_id', ({ result_id }) => renderProtocol({ result_id }));
   Router.add('/stats',               () => renderStats());
   Router.add('/events',              () => renderEvents());
+  Router.add('/skaters',             () => renderSkaters());
 
   Router.init();
 
