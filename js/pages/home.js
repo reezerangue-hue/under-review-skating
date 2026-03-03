@@ -36,6 +36,11 @@ async function renderHome() {
     .sort((a, b) => b.season_best_total - a.season_best_total)
     .slice(0, 10);
 
+  const allTimeSkaters = [...skaters]
+    .filter(s => s.personal_best_total > 0)
+    .sort((a, b) => b.personal_best_total - a.personal_best_total)
+    .slice(0, 10);
+
   const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
   const seasonBests = {};
   results.forEach(r => {
@@ -173,9 +178,32 @@ async function renderHome() {
                 <div class="skater-card-body">
                   <p class="skater-card-name">${s.name}</p>
                   <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country||''}</p>
-                  ${s.personal_best_total ? `
+                  ${s.season_best_total ? `
+                  <p class="skater-card-pb-label">Season Best</p>
+                  <p class="skater-card-pb">${s.season_best_total.toFixed(2)}</p>` : ''}
+                </div>
+              </a>`).join('')}
+          </div>
+        </section>` : ''}
+
+        ${allTimeSkaters.length ? `
+        <!-- ALL TIME SKATERS -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} All Time</p>
+            <h2 class="section-title">Top Skaters of All Time</h2>
+          </div>
+          <div class="grid-5">
+            ${allTimeSkaters.map(s => `
+              <a href="#/skater/${s.id}" class="skater-card">
+                ${s.photo_url
+                  ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
+                  : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
+                <div class="skater-card-body">
+                  <p class="skater-card-name">${s.name}</p>
+                  <p class="skater-card-country">${Nav.getFlagEmoji(s.country_code)} ${s.country||''}</p>
                   <p class="skater-card-pb-label">Personal Best</p>
-                  <p class="skater-card-pb">${s.personal_best_total.toFixed(2)}</p>` : ''}
+                  <p class="skater-card-pb">${s.personal_best_total.toFixed(2)}</p>
                 </div>
               </a>`).join('')}
           </div>
