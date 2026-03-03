@@ -94,11 +94,26 @@ async function renderCompetition({ id }) {
 
   /* Combined SP+FS total per skater for the score distribution chart */
   const combinedTotals = {};
-  [...spResults, ...fsResults].filter(r => r.total_score > 0).forEach(r => {
-    combinedTotals[r.skater_id] = (combinedTotals[r.skater_id] || 0) + r.total_score;
+  spResults.filter(r => r.total_score > 0).forEach(r => {
+    if (!combinedTotals[r.skater_id]) combinedTotals[r.skater_id] = { sp: null, fs: null };
+    combinedTotals[r.skater_id].sp = r.total_score;
+  });
+  fsResults.filter(r => r.total_score > 0).forEach(r => {
+    if (!combinedTotals[r.skater_id]) combinedTotals[r.skater_id] = { sp: null, fs: null };
+    combinedTotals[r.skater_id].fs = r.total_score;
   });
   const distData = Object.entries(combinedTotals)
-    .map(([sid, total_score]) => ({ skater_name: skaterMap[sid]?.name || 'Unknown', total_score }))
+    .map(([sid, { sp, fs }]) => {
+      const sk = skaterMap[sid];
+      return {
+        skater_name: sk?.name || 'Unknown',
+        photo_url:   sk?.photo_url || null,
+        sp_score:    sp,
+        fs_score:    fs,
+        total_score: (sp || 0) + (fs || 0),
+      };
+    })
+    .filter(d => d.total_score > 0)
     .sort((a, b) => b.total_score - a.total_score);
 
   app.innerHTML = `
@@ -183,10 +198,53 @@ async function renderCompetition({ id }) {
         </section>
 
       </div>
+    </div>
+
+    <!-- DOT POPUP -->
+    <div id="dot-popup-backdrop" class="dot-popup-backdrop hidden"></div>
+    <div id="dot-popup-card" class="dot-popup-card hidden" style="position:fixed">
+      <button id="dot-popup-close" class="dot-popup-close" aria-label="Close">✕</button>
+      <div id="dot-popup-img-wrap"></div>
+      <p id="dot-popup-name" class="dot-popup-name"></p>
+      <div class="dot-popup-scores">
+        <div class="dot-popup-score-block">
+          <span class="dot-popup-score-label">SP</span>
+          <span id="dot-popup-sp" class="dot-popup-score-value"></span>
+        </div>
+        <div class="dot-popup-score-block">
+          <span class="dot-popup-score-label">FS</span>
+          <span id="dot-popup-fs" class="dot-popup-score-value"></span>
+        </div>
+        <div class="dot-popup-score-block">
+          <span class="dot-popup-score-label">Total</span>
+          <span id="dot-popup-total" class="dot-popup-score-value"></span>
+        </div>
+      </div>
     </div>`;
 
   if (distData.length >= 3) {
-    const el = document.getElementById('dist-chart');
-    if (el) Charts.drawDotChart(el, distData);
+    const chartEl = document.getElementById('dist-chart');
+    if (chartEl) {
+      Charts.drawDotChart(chartEl, distData, {
+        onDotClick(r) {
+          document.getElementById('dot-popup-backdrop').classList.remove('hidden');
+          document.getElementById('dot-popup-card').classList.remove('hidden');
+          document.getElementById('dot-popup-img-wrap').innerHTML = r.photo_url
+            ? `<img class="dot-popup-photo" src="${r.photo_url}" alt="${r.skater_name}">`
+            : `<div class="dot-popup-placeholder">✦</div>`;
+          document.getElementById('dot-popup-name').textContent = r.skater_name;
+          document.getElementById('dot-popup-sp').textContent   = r.sp_score ? r.sp_score.toFixed(2) : '—';
+          document.getElementById('dot-popup-fs').textContent   = r.fs_score ? r.fs_score.toFixed(2) : '—';
+          document.getElementById('dot-popup-total').textContent = r.total_score.toFixed(2);
+        }
+      });
+    }
   }
+
+  function closePopup() {
+    document.getElementById('dot-popup-backdrop').classList.add('hidden');
+    document.getElementById('dot-popup-card').classList.add('hidden');
+  }
+  document.getElementById('dot-popup-backdrop').addEventListener('click', closePopup);
+  document.getElementById('dot-popup-close').addEventListener('click', closePopup);
 }

@@ -165,9 +165,14 @@ const Charts = (() => {
     scored.forEach((r, i) => {
       const x  = xScale(r.total_score);
       const cy = axisY - 20 - (i % 3) * 18;
-      svg.appendChild(el('circle', { cx: x, cy, r: 9, fill: 'rgba(255,255,255,0.1)' }));
-      svg.appendChild(el('circle', { cx: x, cy, r: 5, fill: 'rgba(255,255,255,0.84)' }));
-      svg.appendChild(el('text', { x, y: cy - 10, fill: 'rgba(255,255,255,0.52)', 'font-size': 8.5, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif' }, (r.skater_name || '').split(' ').pop()));
+
+      const g = document.createElementNS(NS, 'g');
+      if (options.onDotClick) g.setAttribute('style', 'cursor:pointer');
+      g.appendChild(el('circle', { cx: x, cy, r: 9, fill: 'rgba(255,255,255,0.1)' }));
+      g.appendChild(el('circle', { cx: x, cy, r: 5, fill: 'rgba(255,255,255,0.84)' }));
+      g.appendChild(el('text', { x, y: cy - 10, fill: 'rgba(255,255,255,0.52)', 'font-size': 8.5, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif' }, (r.skater_name || '').split(' ').pop()));
+      if (options.onDotClick) g.addEventListener('click', () => options.onDotClick(r));
+      svg.appendChild(g);
     });
 
     container.appendChild(svg);
