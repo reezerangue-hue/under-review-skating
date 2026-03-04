@@ -11,6 +11,7 @@ async function renderHome() {
   ]);
 
   const recentComp = competitions[0] || null;
+  const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
 
   /* Build combined SP+FS totals for the most recent competition */
   const recentResults = (() => {
@@ -108,8 +109,6 @@ async function renderHome() {
   }
 
   const hasSkaterData = skaters.some(s => s.personal_best_total > 0 || s.season_best_total > 0);
-
-  const skaterMap = Object.fromEntries(skaters.map(s => [s.id, s]));
 
   /* Points-based season standings for the most recent season */
   function placementPoints(pos) {
