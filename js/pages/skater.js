@@ -226,12 +226,9 @@ async function renderSkater({ id }) {
     const nextBtn = document.getElementById('gallery-next');
 
     function goTo(idx) {
-      current = Math.max(0, Math.min(idx, maxIdx));
-      // each slide is calc(33.333% - 8px) wide with a 12px gap
+      current = ((idx % (maxIdx + 1)) + (maxIdx + 1)) % (maxIdx + 1);
       track.style.transform = `translateX(calc(-${current} * (33.333% - 8px + 12px)))`;
       counter.textContent = `${current + 1} – ${Math.min(current + 3, total)} / ${total}`;
-      prevBtn.disabled = current === 0;
-      nextBtn.disabled = current === maxIdx;
     }
 
     goTo(0);
