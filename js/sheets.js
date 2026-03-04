@@ -113,7 +113,7 @@ const SheetsDB = (() => {
   function hydrateResult(r) {
     return {
       ...r,
-      placement:       num(r.placement),
+      placement:       ['DSQ','WD'].includes(String(r.placement).trim().toUpperCase()) ? String(r.placement).trim().toUpperCase() : num(r.placement),
       total_score:     num(r.total_score),
       technical_score: num(r.technical_score),
       component_score: num(r.component_score),

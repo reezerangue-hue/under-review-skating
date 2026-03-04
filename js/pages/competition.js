@@ -23,8 +23,9 @@ async function renderCompetition({ id }) {
 
   const skaterMap = Object.fromEntries(skaters.map(s => [s.id, s]));
 
-  const spResults    = results.filter(r => r.segment==='Short Program').sort((a,b)=>(a.placement||99)-(b.placement||99));
-  const fsResults    = results.filter(r => r.segment==='Free Skate').sort((a,b)=>(a.placement||99)-(b.placement||99));
+  function placementSort(p) { return (typeof p === 'number' && p > 0) ? p : 9999; }
+  const spResults    = results.filter(r => r.segment==='Short Program').sort((a,b)=>placementSort(a.placement)-placementSort(b.placement));
+  const fsResults    = results.filter(r => r.segment==='Free Skate').sort((a,b)=>placementSort(a.placement)-placementSort(b.placement));
   const entryResults = [...new Map(results.filter(r => r.segment==='Entry').map(r => [r.skater_id, r])).values()]
     .sort((a,b) => {
       const sbA = skaterMap[a.skater_id]?.season_best_total || 0;
@@ -79,10 +80,11 @@ async function renderCompetition({ id }) {
             ${segResults.map(r => {
               const sk = skaterMap[r.skater_id];
               const pc = placeClass(r.placement);
+              const isNonFinish = r.placement === 'DSQ' || r.placement === 'WD';
               const qBadge = showQ && r.placement >= 1 && r.placement <= 24
                 ? `<span class="q-badge">Q</span>` : '';
               return `<tr onclick="Router.go('/protocol/${r.id}')" title="View protocol">
-                <td class="place-cell ${pc}">${r.placement||'—'}</td>
+                <td class="place-cell ${pc}"${isNonFinish ? ' style="color:hsl(0,90%,60%);font-size:.85rem"' : ''}>${r.placement||'—'}</td>
                 <td>
                   <a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk?sk.name:'Unknown'}</a>
                   ${sk?`<span style="margin-left:6px;font-size:.8rem">${Nav.getFlagEmoji(sk.country_code)}</span>`:''}
