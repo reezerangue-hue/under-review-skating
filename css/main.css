@@ -3,12 +3,6 @@
    Holographic Aura Aesthetic
    ============================================================ */
 
-/* ---- @property registration for animatable hue ---- */
-@property --hue-shift {
-  syntax: '<number>';
-  inherits: false;
-  initial-value: 0;
-}
 
 /* ---- CSS Custom Properties ---- */
 :root {
@@ -49,33 +43,14 @@ img  { max-width: 100%; display: block; }
 a    { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 
-/* ---- Animated Gradient Background ---- */
+/* ---- Solid Dark Jewel Background ---- */
 body {
-  --hue-shift: 0;
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--text-primary);
   overflow-x: hidden;
-  animation: spin-hue 22s linear infinite;
-  background-attachment: fixed;
+  background: #0f0720;
   position: relative;
-}
-
-/* Vibrant jewel tones: amethyst, sapphire, teal, fuchsia */
-body {
-  background: linear-gradient(
-    135deg,
-    hsl(calc(268 + var(--hue-shift)), 88%, 24%) 0%,
-    hsl(calc(192 + var(--hue-shift)), 92%, 22%) 25%,
-    hsl(calc(316 + var(--hue-shift)), 86%, 28%) 50%,
-    hsl(calc(240 + var(--hue-shift)), 88%, 26%) 75%,
-    hsl(calc(268 + var(--hue-shift)), 88%, 24%) 100%
-  );
-}
-
-@keyframes spin-hue {
-  0%   { --hue-shift: 0; }
-  100% { --hue-shift: 360; }
 }
 
 /* ---- Grain / Noise Overlay ---- */
@@ -176,7 +151,7 @@ p  { line-height: 1.65; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .filter-select:focus { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 18px rgba(255,255,255,0.18); }
-.filter-select option { background: #1a0846; color: #f5f0ff; }
+.filter-select option { background: #0f0720; color: #f5f0ff; }
 
 .search-dropdown {
   position: absolute;
