@@ -97,17 +97,36 @@ async function renderHome() {
 
   const hasSkaterData = skaters.some(s => s.personal_best_total > 0 || s.season_best_total > 0);
 
-  const skaterMap  = Object.fromEntries(skaters.map(s => [s.id, s]));
-  const seasonBests = {};
-  results.forEach(r => {
-    if (!r.total_score) return;
-    if (!seasonBests[r.skater_id] || r.total_score > seasonBests[r.skater_id].score)
-      seasonBests[r.skater_id] = { score: r.total_score, sid: r.skater_id };
+  const skaterMap = Object.fromEntries(skaters.map(s => [s.id, s]));
+
+  /* Points-based season standings for the most recent season */
+  function placementPoints(pos) {
+    const pts = 11 - pos; // 1st=10, 2nd=9 … 10th=1
+    return pts > 0 ? pts : 0;
+  }
+
+  const mostRecentSeason = competitions.find(c => c.season)?.season || null;
+  const seasonComps = mostRecentSeason
+    ? competitions.filter(c => c.season === mostRecentSeason)
+    : [];
+
+  const skaterPoints = {};
+  seasonComps.forEach(comp => {
+    const compResults = results.filter(r => r.competition_id === comp.id && r.total_score > 0);
+    const combined = {};
+    compResults.forEach(r => { combined[r.skater_id] = (combined[r.skater_id] || 0) + r.total_score; });
+    Object.entries(combined)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([sid], i) => {
+        const pts = placementPoints(i + 1);
+        if (pts > 0) skaterPoints[sid] = (skaterPoints[sid] || 0) + pts;
+      });
   });
-  const seasonStandings = Object.values(seasonBests)
-    .map(e => ({ skater: skaterMap[e.sid], score: e.score, sid: e.sid }))
+
+  const seasonStandings = Object.entries(skaterPoints)
+    .map(([sid, pts]) => ({ skater: skaterMap[sid], pts, sid }))
     .filter(e => e.skater && e.skater.season_best_total > 0)
-    .sort((a, b) => b.score - a.score)
+    .sort((a, b) => b.pts - a.pts)
     .slice(0, 10);
 
   function levelClass(l) { return 'level-' + (l || 'default').replace(/\s+/g, ''); }
@@ -201,18 +220,21 @@ async function renderHome() {
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
             <div>
-              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Season</p>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} ${mostRecentSeason || 'Season'}</p>
               <h2 class="section-title">Season Standings</h2>
             </div>
             <a href="#/stats" class="section-link">Full stats →</a>
           </div>
+          <p style="color:var(--text-muted);font-size:.74rem;margin-bottom:var(--space-md)">
+            Points: 1st = 10 pts · 2nd = 9 pts · … · 10th = 1 pt
+          </p>
           <div class="card" style="padding:var(--space-md)">
             ${seasonStandings.map((e, i) => `
               <div class="lb-row" onclick="Router.go('/skater/${e.sid}')" style="cursor:pointer">
                 <span class="lb-rank ${i<3?'r'+(i+1):''}">${i+1}</span>
                 <div class="lb-name"><a href="#/skater/${e.sid}" onclick="event.stopPropagation()">${e.skater.name}</a></div>
                 <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)} ${e.skater.country||''}</span>
-                <span class="lb-score">${e.score.toFixed(2)}</span>
+                <span class="lb-score">${e.pts} <span style="font-size:.68rem;opacity:.6;font-weight:500">pts</span></span>
               </div>`).join('')}
           </div>
         </section>` : ''}
