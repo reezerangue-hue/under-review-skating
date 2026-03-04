@@ -211,7 +211,12 @@ const SheetsDB = (() => {
 
       const highestGOE = elements.reduce((max, e) => e.goe > (max?.goe ?? -99) ? e : max, null);
 
-      const totalScores = results.filter(r => r.total_score > 0);
+      const compTotals = Object.values(
+        results.filter(r => r.total_score > 0).reduce((acc, r) => {
+          acc[r.competition_id] = (acc[r.competition_id] || 0) + r.total_score;
+          return acc;
+        }, {})
+      ).filter(v => v > 0);
       const fsScores    = results.filter(r => r.segment === 'Free Skate' && r.component_score > 0);
 
       /* Overall podiums: top-3 combined (SP+FS) finish per competition */
@@ -232,7 +237,7 @@ const SheetsDB = (() => {
 
       return {
         totalCompetitions: numComps,
-        avgTotal:          totalScores.length ? totalScores.reduce((s,r) => s + r.total_score, 0) / totalScores.length : 0,
+        avgTotal:          compTotals.length ? compTotals.reduce((a,b) => a + b, 0) / compTotals.length : 0,
         avgComponent:      fsScores.length ? (fsScores.reduce((s,r) => s + r.component_score, 0) / fsScores.length / 2.67) / 3 : 0,
         podiums:           podiumCount,
         podiumRate:        numComps ? (podiumCount / numComps * 100).toFixed(0) : 'N/A',
