@@ -104,7 +104,7 @@ const Charts = (() => {
     const W      = 560;
     const H      = data.length * (barH + gap) + 20;
     const barW   = W - labelW - scoreW - 16;
-    const maxVal = Math.max(...data.map(d => Math.abs(d.value)));
+    const maxVal = options.maxValue !== undefined ? options.maxValue : Math.max(...data.map(d => Math.abs(d.value)));
 
     const svg = svgRoot(W, H, 'bar-chart');
 

@@ -128,7 +128,7 @@ async function renderProtocol({ result_id }) {
           decimals: 2,
           color:    e.goe >= 0 ? 'rgba(80,255,150,0.78)' : 'rgba(255,80,80,0.78)',
         })),
-        { labelWidth: 90 }
+        { labelWidth: 90, maxValue: 5 }
       );
     }
   }
