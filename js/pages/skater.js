@@ -40,7 +40,13 @@ async function renderSkater({ id }) {
       const sp  = cr.find(r => r.segment === 'Short Program');
       const fs  = cr.find(r => r.segment === 'Free Skate');
       const tot = cr.reduce((s, r) => s + r.total_score, 0);
-      return { label: c.name.split(' ').slice(0,2).join(' '), sp: sp?.total_score, fs: fs?.total_score, total: tot };
+      const hasNonFinish = cr.some(r => r.placement === 'DSQ' || r.placement === 'WD');
+      return {
+        label: c.name.split(' ').slice(0,2).join(' '),
+        sp:    sp?.total_score ?? (hasNonFinish ? 0 : undefined),
+        fs:    fs?.total_score ?? (hasNonFinish ? 0 : undefined),
+        total: tot,
+      };
     })
     .filter(Boolean);
 
@@ -48,11 +54,11 @@ async function renderSkater({ id }) {
   if (progressionData.some(d => d.total > 0)) {
     chartSeries.push({ label: 'Total', color: 'rgba(255,255,255,0.85)', data: progressionData.filter(d=>d.total>0).map(d=>({x:d.label,y:d.total})) });
   }
-  if (progressionData.some(d => d.sp)) {
-    chartSeries.push({ label: 'Short Program', color: 'hsl(200,100%,74%)', data: progressionData.filter(d=>d.sp).map(d=>({x:d.label,y:d.sp})) });
+  if (progressionData.some(d => d.sp != null)) {
+    chartSeries.push({ label: 'Short Program', color: 'hsl(200,100%,74%)', data: progressionData.filter(d=>d.sp!=null).map(d=>({x:d.label,y:d.sp})) });
   }
-  if (progressionData.some(d => d.fs)) {
-    chartSeries.push({ label: 'Free Skate', color: 'hsl(300,80%,78%)', data: progressionData.filter(d=>d.fs).map(d=>({x:d.label,y:d.fs})) });
+  if (progressionData.some(d => d.fs != null)) {
+    chartSeries.push({ label: 'Free Skate', color: 'hsl(300,80%,78%)', data: progressionData.filter(d=>d.fs!=null).map(d=>({x:d.label,y:d.fs})) });
   }
 
   function formatDate(d) {
