@@ -177,6 +177,25 @@ async function renderHome() {
           </div>` : '<p class="no-data">No results recorded yet.</p>'}
         </section>` : ''}
 
+        ${hasSkaterData ? `
+        <!-- TOP SKATERS (filterable) -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
+              <h2 class="section-title">Top Skaters</h2>
+            </div>
+            <select id="top-skaters-filter" class="filter-select" aria-label="Filter top skaters">
+              <option value="this-season">This Season</option>
+              <option value="all-time">All Time</option>
+              ${seasons.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+          <div id="top-skaters-wrap">
+            ${skaterGridHTML(getTopSkaters('this-season'))}
+          </div>
+        </section>` : ''}
+
         ${seasonStandings.length ? `
         <!-- SEASON STANDINGS -->
         <section style="margin-bottom:var(--space-2xl)">
@@ -215,25 +234,6 @@ async function renderHome() {
                   <span>${formatDate(c.date)}</span>
                 </div>
               </a>`).join('')}
-          </div>
-        </section>` : ''}
-
-        ${hasSkaterData ? `
-        <!-- TOP SKATERS (filterable) -->
-        <section style="margin-bottom:var(--space-2xl)">
-          <div class="section-header">
-            <div>
-              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
-              <h2 class="section-title">Top Skaters</h2>
-            </div>
-            <select id="top-skaters-filter" class="filter-select" aria-label="Filter top skaters">
-              <option value="this-season">This Season</option>
-              <option value="all-time">All Time</option>
-              ${seasons.map(s => `<option value="${s}">${s}</option>`).join('')}
-            </select>
-          </div>
-          <div id="top-skaters-wrap">
-            ${skaterGridHTML(getTopSkaters('this-season'))}
           </div>
         </section>` : ''}
 
