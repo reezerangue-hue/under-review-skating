@@ -118,7 +118,7 @@ async function renderHome() {
 
   const mostRecentSeason = competitions.find(c => c.season)?.season || null;
   const seasonComps = mostRecentSeason
-    ? competitions.filter(c => c.season === mostRecentSeason)
+    ? competitions.filter(c => c.season === mostRecentSeason && !(c.level || '').toLowerCase().includes('junior'))
     : [];
 
   const skaterPoints = {};
