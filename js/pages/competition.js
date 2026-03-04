@@ -196,12 +196,13 @@ async function renderCompetition({ id }) {
           <div class="card" style="padding:var(--space-md)">
             ${entryResults.map(r => {
               const sk = skaterMap[r.skater_id];
+              const sb = sk?.season_best_total;
               return `<div class="lb-row" onclick="Router.go('/skater/${r.skater_id}')" style="cursor:pointer">
                 <div class="lb-name">
                   <a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk ? sk.name : 'Unknown'}</a>
                 </div>
                 <span class="lb-country">${sk ? Nav.getFlagEmoji(sk.country_code) : ''}</span>
-                <span class="lb-country" style="font-size:.74rem;opacity:.6">${sk ? sk.country || '' : ''}</span>
+                ${sb ? `<span class="lb-score">${sb.toFixed(2)}</span><span class="lb-country" style="font-size:.68rem;opacity:.55">SB</span>` : ''}
               </div>`;
             }).join('')}
           </div>

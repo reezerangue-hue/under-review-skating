@@ -25,6 +25,13 @@ async function renderEvents() {
     byComp[e.competition_id].push(e);
   });
 
+  /* Build entries per competition (skaters with segment=Entry) */
+  const entriesByComp = {};
+  results.filter(r => r.segment === 'Entry').forEach(r => {
+    if (!entriesByComp[r.competition_id]) entriesByComp[r.competition_id] = new Map();
+    entriesByComp[r.competition_id].set(r.skater_id, r);
+  });
+
   /* Unique filter values */
   const seasons = [...new Set(competitions.filter(c => c.season).map(c => c.season))];
   const levels  = [...new Set(competitions.filter(c => c.level).map(c => c.level))];
@@ -44,6 +51,14 @@ async function renderEvents() {
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
 
+    const entryRows = [...(entriesByComp[comp.id] || new Map()).values()]
+      .map(r => ({ skater_id: r.skater_id, skater: skaterMap[r.skater_id] }))
+      .filter(e => e.skater)
+      .sort((a, b) => (b.skater.season_best_total || 0) - (a.skater.season_best_total || 0))
+      .slice(0, 10);
+
+    const isEntryOnly = rows.length === 0 && entryRows.length > 0;
+
     return `
       <section class="event-section" data-season="${comp.season || ''}" data-level="${comp.level || ''}" style="margin-bottom:var(--space-2xl)">
         <div class="section-header">
@@ -53,7 +68,7 @@ async function renderEvents() {
               <a href="#/competition/${comp.id}" style="color:inherit;text-decoration:none">${comp.name}</a>
             </h2>
           </div>
-          <a href="#/competition/${comp.id}" class="section-link">Full results →</a>
+          <a href="#/competition/${comp.id}" class="section-link">${isEntryOnly ? 'All entries →' : 'Full results →'}</a>
         </div>
         <div style="display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-md);flex-wrap:wrap">
           <span class="level-badge ${levelClass(comp.level)}">${comp.level || 'Event'}</span>
@@ -69,6 +84,16 @@ async function renderEvents() {
               </div>
               <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
               <span class="lb-score">${e.total.toFixed(2)}</span>
+            </div>`).join('')}
+        </div>` : isEntryOnly ? `
+        <div class="card" style="padding:var(--space-md)">
+          ${entryRows.map(e => `
+            <div class="lb-row" onclick="Router.go('/skater/${e.skater_id}')" style="cursor:pointer">
+              <div class="lb-name">
+                <a href="#/skater/${e.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${e.skater.name}</a>
+              </div>
+              <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
+              ${e.skater.season_best_total ? `<span class="lb-score">${e.skater.season_best_total.toFixed(2)}</span><span class="lb-country" style="font-size:.68rem;opacity:.55">SB</span>` : ''}
             </div>`).join('')}
         </div>` : `<p class="no-data">No results recorded yet.</p>`}
       </section>`;
