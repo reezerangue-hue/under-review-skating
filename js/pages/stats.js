@@ -130,7 +130,7 @@ async function renderStats() {
           <section>
             <div class="section-header">
               <div>
-                <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Season</p>
+                <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} All Time</p>
                 <h2 class="section-title">Top Combined Scores</h2>
               </div>
             </div>
