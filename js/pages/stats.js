@@ -252,7 +252,7 @@ async function renderStats() {
             </div>
           </div>
           <p style="color:var(--text-secondary);font-size:.82rem;margin-bottom:var(--space-md)">
-            Average combined score ÷ personal best — how close skaters skate to their ceiling · Minimum 2 competitions
+            Average combined score ÷ personal best = how close skaters skate to their ceiling
           </p>
           <div class="card" style="padding:var(--space-md)">
             ${clutch.map((e,i)=>`
