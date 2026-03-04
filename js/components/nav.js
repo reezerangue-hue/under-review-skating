@@ -38,10 +38,12 @@ const Nav = (() => {
             >
             <div id="search-dropdown" class="search-dropdown hidden" role="listbox" aria-label="Search results"></div>
           </div>
+          <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">☰</button>
         </div>
       </div>`;
 
     initSearch();
+    initHamburger();
     highlightActive();
     window.addEventListener('hashchange', highlightActive);
   }
@@ -56,6 +58,24 @@ const Nav = (() => {
         (route === 'skaters' && hash.startsWith('#/skaters')) ||
         (route === 'stats'   && hash.startsWith('#/stats'));
       a.classList.toggle('active', active);
+    });
+  }
+
+  function initHamburger() {
+    const btn   = document.getElementById('nav-hamburger');
+    const links = document.querySelector('.nav-links');
+    if (!btn || !links) return;
+    btn.addEventListener('click', () => {
+      const open = links.classList.toggle('nav-open');
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open ? '✕' : '☰';
+    });
+    links.addEventListener('click', e => {
+      if (e.target.classList.contains('nav-link')) {
+        links.classList.remove('nav-open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = '☰';
+      }
     });
   }
 
