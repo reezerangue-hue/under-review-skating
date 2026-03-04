@@ -155,7 +155,7 @@ async function renderHome() {
         <div class="sparkle-field" id="hero-sf"></div>
         <p class="hero-eyebrow">${Sparkles.html('sparkle-sm')} Live Scores &amp; Statistics ${Sparkles.html('sparkle-sm')}</p>
         <h1 class="hero-title">Under<br>Review</h1>
-        <p class="hero-sub">Figure skating scores, protocol sheets, and analytics — all in one place.</p>
+        <p class="hero-sub">Figure skating scores, element breakdowns, and analytics, all in one place.</p>
         <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
           <a href="#/stats" class="btn">Season Statistics</a>
           ${recentComp ? `<a href="#/competition/${recentComp.id}" class="btn">Latest Event</a>` : ''}
