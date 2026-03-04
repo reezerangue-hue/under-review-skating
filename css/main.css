@@ -61,15 +61,15 @@ body {
   position: relative;
 }
 
-/* Deep jewel tones: indigo, teal, magenta */
+/* Vibrant jewel tones: amethyst, sapphire, teal, fuchsia */
 body {
   background: linear-gradient(
     135deg,
-    hsl(calc(268 + var(--hue-shift)), 62%, 16%) 0%,
-    hsl(calc(186 + var(--hue-shift)), 66%, 14%) 25%,
-    hsl(calc(312 + var(--hue-shift)), 60%, 19%) 50%,
-    hsl(calc(238 + var(--hue-shift)), 56%, 17%) 75%,
-    hsl(calc(268 + var(--hue-shift)), 62%, 16%) 100%
+    hsl(calc(268 + var(--hue-shift)), 88%, 24%) 0%,
+    hsl(calc(192 + var(--hue-shift)), 92%, 22%) 25%,
+    hsl(calc(316 + var(--hue-shift)), 86%, 28%) 50%,
+    hsl(calc(240 + var(--hue-shift)), 88%, 26%) 75%,
+    hsl(calc(268 + var(--hue-shift)), 88%, 24%) 100%
   );
 }
 
@@ -176,7 +176,7 @@ p  { line-height: 1.65; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .filter-select:focus { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 18px rgba(255,255,255,0.18); }
-.filter-select option { background: #160b35; color: #f5f0ff; }
+.filter-select option { background: #1a0846; color: #f5f0ff; }
 
 .search-dropdown {
   position: absolute;
