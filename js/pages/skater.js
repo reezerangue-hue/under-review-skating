@@ -122,7 +122,7 @@ async function renderSkater({ id }) {
               { label:'Competitions',     val:stats.totalCompetitions },
               { label:'Podiums',          val:stats.podiums,           sub:stats.podiumRate+'% rate' },
               { label:'Avg Total',        val:stats.avgTotal   ? stats.avgTotal.toFixed(2)   : '—' },
-              { label:'Average Component Mark', val:stats.avgComponent?stats.avgComponent.toFixed(2):'—' },
+              { label:'Avg Component Mark', val:stats.avgComponent?stats.avgComponent.toFixed(2):'—' },
               { label:'Ultra-C Attempts', val:stats.ultraCAttempts },
               { label:'UC Landing Rate',  val:stats.ultraCLandingRate+'%' },
               { label:'Top Ultra-C',      val:stats.topUCElement, sub:stats.topUCAttempts?stats.topUCAttempts+' attempts':'' },
