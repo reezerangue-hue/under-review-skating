@@ -26,7 +26,12 @@ async function renderCompetition({ id }) {
   const spResults    = results.filter(r => r.segment==='Short Program').sort((a,b)=>(a.placement||99)-(b.placement||99));
   const fsResults    = results.filter(r => r.segment==='Free Skate').sort((a,b)=>(a.placement||99)-(b.placement||99));
   const entryResults = [...new Map(results.filter(r => r.segment==='Entry').map(r => [r.skater_id, r])).values()]
-    .sort((a,b) => (skaterMap[a.skater_id]?.name||'').localeCompare(skaterMap[b.skater_id]?.name||''));
+    .sort((a,b) => {
+      const sbA = skaterMap[a.skater_id]?.season_best_total || 0;
+      const sbB = skaterMap[b.skater_id]?.season_best_total || 0;
+      if (sbB !== sbA) return sbB - sbA;
+      return (skaterMap[a.skater_id]?.name||'').localeCompare(skaterMap[b.skater_id]?.name||'');
+    });
 
   /* Fetch all elements for this competition */
   const allElements = (await Promise.all(results.map(r => SheetsDB.getElements(r.id)))).flat();
