@@ -146,7 +146,7 @@ async function renderSkater({ id }) {
         ${chartSeries.length ? `
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
-            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Season</p>
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Career</p>
             <h2 class="section-title">Score Progression</h2>
           </div>
           <div class="card">
