@@ -91,7 +91,7 @@ async function renderStats() {
       const combos = {};
       sRes.forEach(r=>{ if(!combos[r.competition_id])combos[r.competition_id]=0; combos[r.competition_id]+=r.total_score; });
       const vals = Object.values(combos).filter(v=>v>0);
-      if (!vals.length) return null;
+      if (vals.length < 2) return null;
       const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
       return { skater:s, avg, pb:s.personal_best_total, ratio:avg/s.personal_best_total };
     })
@@ -252,7 +252,7 @@ async function renderStats() {
             </div>
           </div>
           <p style="color:var(--text-secondary);font-size:.82rem;margin-bottom:var(--space-md)">
-            Average combined score ÷ personal best — how close skaters skate to their ceiling.
+            Average combined score ÷ personal best — how close skaters skate to their ceiling · Minimum 2 competitions
           </p>
           <div class="card" style="padding:var(--space-md)">
             ${clutch.map((e,i)=>`
