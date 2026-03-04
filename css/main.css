@@ -408,6 +408,8 @@ p  { line-height: 1.65; }
 .exec-Underrotated       { background:rgba(255,150,80,0.18); border:1px solid rgba(255,150,80,0.32);  color:hsl(30,100%,74%); }
 .exec-Invalid            { background:rgba(255,50,100,0.18); border:1px solid rgba(255,50,100,0.32);  color:hsl(345,100%,74%); }
 .exec-MissedRequirement  { background:rgba(160,80,255,0.18); border:1px solid rgba(160,80,255,0.32);  color:hsl(268,100%,78%); }
+.exec-FullyRotated       { background:rgba(255,100,180,0.18); border:1px solid rgba(255,100,180,0.32); color:hsl(330,100%,78%); }
+.exec-Repeat             { background:rgba(139,0,0,0.25);     border:1px solid rgba(139,0,0,0.5);      color:hsl(0,100%,60%); }
 .exec-default            { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);  color:var(--text-secondary); }
 
 /* ====================================================

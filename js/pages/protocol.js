@@ -172,7 +172,7 @@ function renderElemCard(elem, landingRates) {
         <div class="elem-tags">
           ${execLabels.map(label => {
             const key = label.replace(/\s+/g, '');
-            const known = ['Clean','Fall','StepOut','Downgraded','UnclearEdge','IncorrectEdge','RotationalFall','Quarter','Underrotated','Invalid','MissedRequirement'];
+            const known = ['Clean','Fall','StepOut','Downgraded','UnclearEdge','IncorrectEdge','RotationalFall','Quarter','Underrotated','Invalid','MissedRequirement','Repeat','FullyRotated'];
             const cls = known.includes(key) ? `exec-${key}` : 'exec-default';
             return `<span class="exec-badge ${cls}">${label}</span>`;
           }).join('')}
