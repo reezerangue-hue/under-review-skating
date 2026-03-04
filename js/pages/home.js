@@ -29,6 +29,18 @@ async function renderHome() {
       .slice(0, 10);
   })();
 
+  const recentEntries = (() => {
+    if (!recentComp || recentResults.length) return [];
+    return [...new Map(
+      results.filter(r => r.competition_id === recentComp.id && r.segment === 'Entry')
+             .map(r => [r.skater_id, r])
+    ).values()]
+      .map(r => ({ skater_id: r.skater_id, skater: skaterMap[r.skater_id] }))
+      .filter(e => e.skater)
+      .sort((a, b) => (b.skater.season_best_total || 0) - (a.skater.season_best_total || 0))
+      .slice(0, 10);
+  })();
+
   const recentComps = competitions.slice(0, 6);
 
   /* Unique seasons from competitions, newest first */
@@ -161,7 +173,7 @@ async function renderHome() {
               <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Most Recent</p>
               <h2 class="section-title">${recentComp.name}</h2>
             </div>
-            <a href="#/competition/${recentComp.id}" class="section-link">Full results →</a>
+            <a href="#/competition/${recentComp.id}" class="section-link">${recentEntries.length && !recentResults.length ? 'All entries →' : 'Full results →'}</a>
           </div>
           <div style="display:flex;gap:var(--space-sm);align-items:center;margin-bottom:var(--space-md);flex-wrap:wrap">
             <span class="level-badge ${levelClass(recentComp.level)}">${recentComp.level || 'Event'}</span>
@@ -193,6 +205,16 @@ async function renderHome() {
                 }).join('')}
               </tbody>
             </table>
+          </div>` : recentEntries.length ? `
+          <div class="card" style="padding:var(--space-md)">
+            ${recentEntries.map(e => `
+              <div class="lb-row" onclick="Router.go('/skater/${e.skater_id}')" style="cursor:pointer">
+                <div class="lb-name">
+                  <a href="#/skater/${e.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${e.skater.name}</a>
+                </div>
+                <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
+                ${e.skater.season_best_total ? `<span class="lb-score">${e.skater.season_best_total.toFixed(2)}</span><span class="lb-country" style="font-size:.68rem;opacity:.55">SB</span>` : ''}
+              </div>`).join('')}
           </div>` : '<p class="no-data">No results recorded yet.</p>'}
         </section>` : ''}
 
