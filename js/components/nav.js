@@ -38,11 +38,9 @@ const Nav = (() => {
             >
             <div id="search-dropdown" class="search-dropdown hidden" role="listbox" aria-label="Search results"></div>
           </div>
-          <button id="theme-toggle" class="theme-btn" title="Toggle dark / light mode" aria-label="Toggle dark mode">◑</button>
         </div>
       </div>`;
 
-    initTheme();
     initSearch();
     highlightActive();
     window.addEventListener('hashchange', highlightActive);
@@ -58,14 +56,6 @@ const Nav = (() => {
         (route === 'skaters' && hash.startsWith('#/skaters')) ||
         (route === 'stats'   && hash.startsWith('#/stats'));
       a.classList.toggle('active', active);
-    });
-  }
-
-  function initTheme() {
-    if (localStorage.getItem('urs-theme') === 'dark') document.body.classList.add('dark');
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('urs-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
     });
   }
 

@@ -20,12 +20,11 @@
   --glass-shadow: 0 8px 32px rgba(255, 255, 255, 0.12);
   --glass-blur:   blur(16px);
 
-  /* Light mode — dark indigo text for readability over pastel gradient */
-  --text-primary:   rgba(18, 10, 55, 0.90);
-  --text-secondary: rgba(18, 10, 55, 0.62);
-  --text-muted:     rgba(18, 10, 55, 0.40);
+  --text-primary:   rgba(255, 255, 255, 0.96);
+  --text-secondary: rgba(255, 255, 255, 0.68);
+  --text-muted:     rgba(255, 255, 255, 0.42);
 
-  --accent-glow: 0 0 24px rgba(18, 10, 55, 0.25);
+  --accent-glow: 0 0 24px rgba(255, 255, 255, 0.45);
 
   --radius-sm:   8px;
   --radius-md:   16px;
@@ -41,17 +40,6 @@
   --space-3xl: 5rem;
 
   --transition: 0.25s ease;
-}
-
-body.dark {
-  --glass-bg:     rgba(0, 0, 0, 0.22);
-  --glass-border: rgba(255, 255, 255, 0.14);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  /* Dark mode — restore white text */
-  --text-primary:   rgba(255, 255, 255, 0.96);
-  --text-secondary: rgba(255, 255, 255, 0.68);
-  --text-muted:     rgba(255, 255, 255, 0.42);
-  --accent-glow:    0 0 24px rgba(255, 255, 255, 0.45);
 }
 
 /* ---- Reset ---- */
@@ -73,21 +61,8 @@ body {
   position: relative;
 }
 
-/* Light — soft pastel rainbow aura */
-body:not(.dark) {
-  background: linear-gradient(
-    135deg,
-    hsl(calc(330 + var(--hue-shift)), 82%, 82%) 0%,
-    hsl(calc(288 + var(--hue-shift)), 72%, 83%) 18%,
-    hsl(calc(222 + var(--hue-shift)), 68%, 85%) 38%,
-    hsl(calc(170 + var(--hue-shift)), 62%, 82%) 58%,
-    hsl(calc( 52 + var(--hue-shift)), 80%, 82%) 78%,
-    hsl(calc(330 + var(--hue-shift)), 82%, 82%) 100%
-  );
-}
-
-/* Dark — deep jewel tones: indigo, teal, magenta */
-body.dark {
+/* Deep jewel tones: indigo, teal, magenta */
+body {
   background: linear-gradient(
     135deg,
     hsl(calc(268 + var(--hue-shift)), 62%, 16%) 0%,
@@ -243,18 +218,7 @@ p  { line-height: 1.65; }
   white-space: nowrap;
 }
 
-.theme-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  width: 34px; height: 34px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-primary);
-  font-size: 1rem;
-  transition: all var(--transition);
-  backdrop-filter: blur(8px);
-}
-.theme-btn:hover { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 14px rgba(255,255,255,0.25); }
+
 
 /* ====================================================
    LAYOUT
