@@ -452,6 +452,7 @@ p  { line-height: 1.65; }
 .place-cell.gold   { color: hsl(50,100%,72%);  }
 .place-cell.silver { color: hsl(0,0%,82%);      }
 .place-cell.bronze { color: hsl(28,76%,65%);    }
+.q-badge { display: inline-block; margin-left: 6px; padding: 1px 5px; border-radius: var(--radius-full); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; background: rgba(100,200,255,0.15); border: 1px solid rgba(100,200,255,0.35); color: hsl(200,100%,75%); vertical-align: middle; }
 
 .score-cell { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .score-cell.total { font-size: 1.05rem; font-weight: 700; }

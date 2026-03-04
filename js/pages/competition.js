@@ -61,7 +61,7 @@ async function renderCompetition({ id }) {
   function levelClass(l) { return 'level-' + (l||'default').replace(/\s+/g,''); }
   function placeClass(p) { if(p===1)return 'gold'; if(p===2)return 'silver'; if(p===3)return 'bronze'; return ''; }
 
-  function resultTable(segResults, label) {
+  function resultTable(segResults, label, showQ) {
     if (!segResults.length) return `<p class="no-data">No ${label} results recorded.</p>`;
     return `
       <div class="table-wrap">
@@ -79,11 +79,14 @@ async function renderCompetition({ id }) {
             ${segResults.map(r => {
               const sk = skaterMap[r.skater_id];
               const pc = placeClass(r.placement);
+              const qBadge = showQ && r.placement >= 1 && r.placement <= 24
+                ? `<span class="q-badge">Q</span>` : '';
               return `<tr onclick="Router.go('/protocol/${r.id}')" title="View protocol">
                 <td class="place-cell ${pc}">${r.placement||'—'}</td>
                 <td>
                   <a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk?sk.name:'Unknown'}</a>
                   ${sk?`<span style="margin-left:6px;font-size:.8rem">${Nav.getFlagEmoji(sk.country_code)}</span>`:''}
+                  ${qBadge}
                 </td>
                 <td class="score-cell">${r.technical_score?r.technical_score.toFixed(2):'—'}</td>
                 <td class="score-cell">${r.component_score?r.component_score.toFixed(2):'—'}</td>
@@ -215,7 +218,7 @@ async function renderCompetition({ id }) {
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Segment</p>
             <h2 class="section-title">Short Program</h2>
           </div>
-          ${resultTable(spResults,'Short Program')}
+          ${resultTable(spResults,'Short Program',true)}
         </section>` : ''}
 
         <!-- FREE SKATE -->
