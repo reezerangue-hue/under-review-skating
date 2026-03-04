@@ -176,7 +176,7 @@ p  { line-height: 1.65; }
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .filter-select:focus { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 18px rgba(255,255,255,0.18); }
-.filter-select option { background: var(--bg-base); color: var(--text-primary); }
+.filter-select option { background: #160b35; color: #f5f0ff; }
 
 .search-dropdown {
   position: absolute;
