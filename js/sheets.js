@@ -8,6 +8,7 @@ const SheetsDB = (() => {
     competitions: null,
     results:      null,
     elements:     null,
+    gallery:      null,
     loaded:       false,
     loading:      false,
     loadPromise:  null,
@@ -70,16 +71,18 @@ const SheetsDB = (() => {
       if (!isConfigured()) {
         throw new Error('NOT_CONFIGURED');
       }
-      const [skaters, competitions, results, elements] = await Promise.all([
+      const [skaters, competitions, results, elements, gallery] = await Promise.all([
         fetchTab(CONFIG.TABS.SKATERS),
         fetchTab(CONFIG.TABS.COMPETITIONS),
         fetchTab(CONFIG.TABS.RESULTS),
         fetchTab(CONFIG.TABS.ELEMENTS),
+        fetchTab(CONFIG.TABS.GALLERY),
       ]);
       cache.skaters      = skaters;
       cache.competitions = competitions;
       cache.results      = results;
       cache.elements     = elements;
+      cache.gallery      = gallery;
       cache.loaded       = true;
     })();
 
@@ -265,6 +268,14 @@ const SheetsDB = (() => {
       };
 
       return { career, season: seasonStat };
+    },
+
+    /* --- Gallery --- */
+    async getSkaterGallery(skaterId) {
+      await loadAll();
+      const row = (cache.gallery || []).find(g => g.skater_id === skaterId);
+      if (!row) return [];
+      return [1,2,3,4,5,6,7,8].map(i => row[`gallery${i}`]).filter(Boolean);
     },
 
     /* Get all data (for stats page) */

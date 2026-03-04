@@ -16,6 +16,7 @@ const CONFIG = {
     COMPETITIONS: 'Competitions',
     RESULTS:      'Results',
     ELEMENTS:     'Elements',
+    GALLERY:      'Gallery',
   },
 
   /** Site display name */

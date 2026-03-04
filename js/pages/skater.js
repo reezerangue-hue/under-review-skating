@@ -4,11 +4,12 @@
 async function renderSkater({ id }) {
   const app = document.getElementById('app');
 
-  const [skater, allResults, allComps, stats] = await Promise.all([
+  const [skater, allResults, allComps, stats, galleryImages] = await Promise.all([
     SheetsDB.getSkater(id),
     SheetsDB.getSkaterResults(id),
     SheetsDB.getCompetitions(),
     SheetsDB.getSkaterStats(id),
+    SheetsDB.getSkaterGallery(id),
   ]);
 
   if (!skater) {
@@ -148,6 +149,28 @@ async function renderSkater({ id }) {
         </section>` : ''}
 
         <!-- COMPETITION HISTORY -->
+        <!-- GALLERY -->
+        ${galleryImages.length ? `
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Photos</p>
+            <h2 class="section-title">Gallery</h2>
+          </div>
+          <div class="gallery-carousel" id="skater-gallery">
+            <button class="gallery-arrow gallery-arrow-prev" id="gallery-prev" aria-label="Previous">&#8592;</button>
+            <div class="gallery-track-wrap">
+              <div class="gallery-track" id="gallery-track">
+                ${galleryImages.map((url, i) => `
+                  <div class="gallery-slide">
+                    <img src="${url}" alt="Gallery photo ${i+1}" loading="lazy">
+                  </div>`).join('')}
+              </div>
+            </div>
+            <button class="gallery-arrow gallery-arrow-next" id="gallery-next" aria-label="Next">&#8594;</button>
+            <div class="gallery-counter" id="gallery-counter">1 / ${galleryImages.length}</div>
+          </div>
+        </section>` : ''}
+
         ${Object.keys(resultsByComp).length ? `
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
@@ -191,5 +214,21 @@ async function renderSkater({ id }) {
   if (chartSeries.length) {
     const chartEl = document.getElementById('progression-chart');
     if (chartEl) Charts.drawLineChart(chartEl, chartSeries);
+  }
+
+  if (galleryImages.length) {
+    let current = 0;
+    const total   = galleryImages.length;
+    const track   = document.getElementById('gallery-track');
+    const counter = document.getElementById('gallery-counter');
+
+    function goTo(idx) {
+      current = (idx + total) % total;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      counter.textContent = `${current + 1} / ${total}`;
+    }
+
+    document.getElementById('gallery-prev').addEventListener('click', () => goTo(current - 1));
+    document.getElementById('gallery-next').addEventListener('click', () => goTo(current + 1));
   }
 }
