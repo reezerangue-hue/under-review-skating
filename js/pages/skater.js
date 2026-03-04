@@ -219,16 +219,23 @@ async function renderSkater({ id }) {
   if (galleryImages.length) {
     let current = 0;
     const total   = galleryImages.length;
+    const maxIdx  = Math.max(0, total - 3);
     const track   = document.getElementById('gallery-track');
     const counter = document.getElementById('gallery-counter');
+    const prevBtn = document.getElementById('gallery-prev');
+    const nextBtn = document.getElementById('gallery-next');
 
     function goTo(idx) {
-      current = (idx + total) % total;
-      track.style.transform = `translateX(-${current * 100}%)`;
-      counter.textContent = `${current + 1} / ${total}`;
+      current = Math.max(0, Math.min(idx, maxIdx));
+      // each slide is calc(33.333% - 8px) wide with a 12px gap
+      track.style.transform = `translateX(calc(-${current} * (33.333% - 8px + 12px)))`;
+      counter.textContent = `${current + 1} – ${Math.min(current + 3, total)} / ${total}`;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === maxIdx;
     }
 
-    document.getElementById('gallery-prev').addEventListener('click', () => goTo(current - 1));
-    document.getElementById('gallery-next').addEventListener('click', () => goTo(current + 1));
+    goTo(0);
+    prevBtn.addEventListener('click', () => goTo(current - 1));
+    nextBtn.addEventListener('click', () => goTo(current + 1));
   }
 }
