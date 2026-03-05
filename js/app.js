@@ -11,6 +11,7 @@
   Router.add('/stats',               () => renderStats());
   Router.add('/events',              () => renderEvents());
   Router.add('/skaters',             () => renderSkaters());
+  Router.add('/junior-eligibility',  () => renderJuniorEligibility());
 
   Router.init();
 
