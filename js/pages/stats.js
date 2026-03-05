@@ -289,7 +289,7 @@ async function renderStats() {
                 <span class="lb-country">${Nav.getFlagEmoji(e.skater.country_code)}</span>
                 <div style="flex:1;max-width:160px">
                   <div class="landing-bar" style="height:7px">
-                    <div class="landing-fill" style="width:${Math.min(e.ratio*100,100).toFixed(1)}%;background:linear-gradient(90deg,hsl(200,100%,65%),hsl(280,100%,72%))"></div>
+                    <div class="landing-fill" style="width:${Math.min(e.ratio*100,100).toFixed(1)}%;background:linear-gradient(90deg,#2D4A1E,#8BAF5A)"></div>
                   </div>
                 </div>
                 <span class="lb-score" style="font-size:1rem">${pct(e.ratio)}</span>

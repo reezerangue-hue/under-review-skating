@@ -65,13 +65,13 @@ async function renderSkater({ id }) {
 
   const chartSeries = [];
   if (progressionData.some(d => d.total > 0)) {
-    chartSeries.push({ label: 'Total', color: 'rgba(255,255,255,0.85)', data: progressionData.filter(d=>d.total>0).map(d=>({x:d.label,y:d.total})) });
+    chartSeries.push({ label: 'Total', color: '#1C1C1A', data: progressionData.filter(d=>d.total>0).map(d=>({x:d.label,y:d.total})) });
   }
   if (progressionData.some(d => d.sp != null)) {
-    chartSeries.push({ label: 'Short Program', color: 'hsl(200,100%,74%)', data: progressionData.filter(d=>d.sp!=null).map(d=>({x:d.label,y:d.sp})) });
+    chartSeries.push({ label: 'Short Program', color: '#2D4A1E', data: progressionData.filter(d=>d.sp!=null).map(d=>({x:d.label,y:d.sp})) });
   }
   if (progressionData.some(d => d.fs != null)) {
-    chartSeries.push({ label: 'Free Skate', color: 'hsl(300,80%,78%)', data: progressionData.filter(d=>d.fs!=null).map(d=>({x:d.label,y:d.fs})) });
+    chartSeries.push({ label: 'Free Skate', color: '#8BAF5A', data: progressionData.filter(d=>d.fs!=null).map(d=>({x:d.label,y:d.fs})) });
   }
 
   function formatDate(d) {
