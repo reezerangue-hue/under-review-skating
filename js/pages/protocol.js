@@ -126,7 +126,7 @@ async function renderProtocol({ result_id }) {
           label:    e.element_code,
           value:    e.goe,
           decimals: 2,
-          color:    e.goe >= 0 ? 'rgba(80,255,150,0.78)' : 'rgba(255,80,80,0.78)',
+          color:    e.goe >= 0 ? 'rgba(45,74,30,0.82)' : 'rgba(192,57,43,0.78)',
         })),
         { labelWidth: 90, maxValue: 3 }
       );

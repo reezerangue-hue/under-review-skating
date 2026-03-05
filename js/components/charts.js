@@ -47,20 +47,20 @@ const Charts = (() => {
     for (let i = 0; i <= 4; i++) {
       const yv = yMin + (i / 4) * (yMax - yMin);
       const y  = yScale(yv);
-      svg.appendChild(el('line', { x1: pad.left, y1: y, x2: pad.left + pw, y2: y, stroke: 'rgba(255,255,255,0.1)', 'stroke-width': 1 }));
-      svg.appendChild(el('text', { x: pad.left - 6, y: y + 4, fill: 'rgba(255,255,255,0.42)', 'font-size': 10, 'text-anchor': 'end', 'font-family': 'Inter,sans-serif' }, yv.toFixed(0)));
+      svg.appendChild(el('line', { x1: pad.left, y1: y, x2: pad.left + pw, y2: y, stroke: 'rgba(28,28,26,0.10)', 'stroke-width': 1 }));
+      svg.appendChild(el('text', { x: pad.left - 6, y: y + 4, fill: 'rgba(28,28,26,0.45)', 'font-size': 10, 'text-anchor': 'end', 'font-family': "'Space Mono',monospace" }, yv.toFixed(0)));
     }
 
     /* x labels */
     series[0].data.forEach((d, i) => {
       svg.appendChild(el('text', {
         x: xScale(i), y: H - 10,
-        fill: 'rgba(255,255,255,0.42)', 'font-size': 9, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif',
+        fill: 'rgba(28,28,26,0.45)', 'font-size': 9, 'text-anchor': 'middle', 'font-family': "'Space Mono',monospace",
       }, String(d.x || '').slice(0, 12)));
     });
 
     /* series */
-    const COLORS = ['rgba(255,255,255,0.85)', 'hsl(200,100%,74%)', 'hsl(300,80%,78%)'];
+    const COLORS = ['#1C1C1A', '#2D4A1E', '#8BAF5A'];
     series.forEach((s, si) => {
       const color = s.color || COLORS[si % COLORS.length];
       if (!s.data.length) return;
@@ -68,14 +68,14 @@ const Charts = (() => {
       svg.appendChild(el('polyline', {
         points: s.data.map((d, i) => `${xScale(i)},${yScale(d.y)}`).join(' '),
         fill: 'none', stroke: color, 'stroke-width': 2,
-        'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.88,
+        'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9,
       }));
 
       s.data.forEach((d, i) => {
         const cx = xScale(i), cy = yScale(d.y);
-        svg.appendChild(el('circle', { cx, cy, r: 7, fill: color, opacity: 0.18 }));
+        svg.appendChild(el('circle', { cx, cy, r: 7, fill: color, opacity: 0.12 }));
         svg.appendChild(el('circle', { cx, cy, r: 4, fill: color }));
-        svg.appendChild(el('text', { x: cx, y: cy - 9, fill: color, 'font-size': 9.5, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif', 'font-weight': 600 }, d.y.toFixed(2)));
+        svg.appendChild(el('text', { x: cx, y: cy - 9, fill: color, 'font-size': 9.5, 'text-anchor': 'middle', 'font-family': "'Space Mono',monospace", 'font-weight': 700 }, d.y.toFixed(2)));
       });
     });
 
@@ -84,7 +84,7 @@ const Charts = (() => {
       const color = s.color || COLORS[si % COLORS.length];
       const lx = pad.left + si * 140;
       svg.appendChild(el('rect', { x: lx, y: H - 36, width: 18, height: 3, fill: color, rx: 2 }));
-      svg.appendChild(el('text', { x: lx + 24, y: H - 30, fill: 'rgba(255,255,255,0.52)', 'font-size': 9.5, 'font-family': 'Inter,sans-serif' }, s.label || ''));
+      svg.appendChild(el('text', { x: lx + 24, y: H - 30, fill: 'rgba(28,28,26,0.55)', 'font-size': 9.5, 'font-family': "'Space Mono',monospace" }, s.label || ''));
     });
 
     container.appendChild(svg);
@@ -111,22 +111,22 @@ const Charts = (() => {
     data.forEach((d, i) => {
       const y     = 10 + i * (barH + gap);
       const pct   = maxVal ? Math.abs(d.value) / maxVal : 0;
-      const color = d.color || 'rgba(255,255,255,0.72)';
+      const color = d.color || '#2D4A1E';
 
       svg.appendChild(el('text', {
         x: labelW - 8, y: y + barH / 2 + 4,
-        fill: 'rgba(255,255,255,0.58)', 'font-size': 10, 'text-anchor': 'end', 'font-family': 'Inter,sans-serif',
+        fill: 'rgba(28,28,26,0.55)', 'font-size': 10, 'text-anchor': 'end', 'font-family': "'Space Mono',monospace",
       }, String(d.label).slice(0, 14)));
 
-      svg.appendChild(el('rect', { x: labelW, y, width: barW, height: barH, rx: 4, fill: 'rgba(255,255,255,0.07)' }));
+      svg.appendChild(el('rect', { x: labelW, y, width: barW, height: barH, rx: 4, fill: 'rgba(28,28,26,0.07)' }));
 
       const fw = Math.max(pct * barW, 3);
-      svg.appendChild(el('rect', { x: labelW, y, width: fw, height: barH, rx: 4, fill: color, opacity: 0.84 }));
+      svg.appendChild(el('rect', { x: labelW, y, width: fw, height: barH, rx: 4, fill: color, opacity: 0.82 }));
 
       const decimals = d.decimals !== undefined ? d.decimals : 2;
       svg.appendChild(el('text', {
         x: labelW + barW + 8, y: y + barH / 2 + 4,
-        fill: 'rgba(255,255,255,0.68)', 'font-size': 10.5, 'font-weight': 600, 'font-family': 'Inter,sans-serif',
+        fill: 'rgba(28,28,26,0.68)', 'font-size': 10.5, 'font-weight': 700, 'font-family': "'Space Mono',monospace",
       }, typeof d.value === 'number' ? d.value.toFixed(decimals) : String(d.value)));
     });
 
@@ -153,13 +153,13 @@ const Charts = (() => {
     const svg = svgRoot(W, H, 'dot-chart');
 
     const axisY = H - pad.bottom;
-    svg.appendChild(el('line', { x1: pad.left, y1: axisY, x2: pad.left + pw, y2: axisY, stroke: 'rgba(255,255,255,0.22)', 'stroke-width': 1 }));
+    svg.appendChild(el('line', { x1: pad.left, y1: axisY, x2: pad.left + pw, y2: axisY, stroke: 'rgba(28,28,26,0.20)', 'stroke-width': 1 }));
 
     for (let i = 0; i <= 5; i++) {
       const v = minS + (i / 5) * (maxS - minS);
       const x = xScale(v);
-      svg.appendChild(el('line',  { x1: x, y1: axisY, x2: x, y2: axisY + 4, stroke: 'rgba(255,255,255,0.22)', 'stroke-width': 1 }));
-      svg.appendChild(el('text',  { x, y: axisY + 14, fill: 'rgba(255,255,255,0.42)', 'font-size': 9, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif' }, v.toFixed(0)));
+      svg.appendChild(el('line',  { x1: x, y1: axisY, x2: x, y2: axisY + 4, stroke: 'rgba(28,28,26,0.20)', 'stroke-width': 1 }));
+      svg.appendChild(el('text',  { x, y: axisY + 14, fill: 'rgba(28,28,26,0.45)', 'font-size': 9, 'text-anchor': 'middle', 'font-family': "'Space Mono',monospace" }, v.toFixed(0)));
     }
 
     scored.forEach((r, i) => {
@@ -168,9 +168,9 @@ const Charts = (() => {
 
       const g = document.createElementNS(NS, 'g');
       if (options.onDotClick) g.setAttribute('style', 'cursor:pointer');
-      g.appendChild(el('circle', { cx: x, cy, r: 9, fill: 'rgba(255,255,255,0.1)' }));
-      g.appendChild(el('circle', { cx: x, cy, r: 5, fill: 'rgba(255,255,255,0.84)' }));
-      g.appendChild(el('text', { x, y: cy - 10, fill: 'rgba(255,255,255,0.52)', 'font-size': 8.5, 'text-anchor': 'middle', 'font-family': 'Inter,sans-serif' }, (r.skater_name || '').split(' ').pop()));
+      g.appendChild(el('circle', { cx: x, cy, r: 9, fill: 'rgba(45,74,30,0.12)' }));
+      g.appendChild(el('circle', { cx: x, cy, r: 5, fill: '#2D4A1E' }));
+      g.appendChild(el('text', { x, y: cy - 10, fill: 'rgba(28,28,26,0.52)', 'font-size': 8.5, 'text-anchor': 'middle', 'font-family': "'Space Mono',monospace" }, (r.skater_name || '').split(' ').pop()));
       if (options.onDotClick) g.addEventListener('click', () => options.onDotClick(r));
       svg.appendChild(g);
     });
