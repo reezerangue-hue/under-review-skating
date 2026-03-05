@@ -97,7 +97,8 @@ async function renderStats() {
           rate:   v.total ? v.landed / v.total : 0,
         }))
         .filter(e => e.skater)
-        .sort((a, b) => b.rate - a.rate || b.total - a.total);
+        .sort((a, b) => b.rate - a.rate || b.total - a.total)
+        .slice(0, 5);
       return { code, name, skaterList, totalAttempts };
     })
     .filter(e => e.skaterList.length > 0)
@@ -233,18 +234,18 @@ async function renderStats() {
                   <span style="margin-left:auto;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted)">${elem.totalAttempts} attempt${elem.totalAttempts !== 1 ? 's' : ''}</span>
                 </div>
                 ${elem.skaterList.map((e, i) => `
-                  <div class="lb-row" style="padding:6px var(--space-sm)">
-                    <span class="lb-rank ${pc(i)}" style="font-size:.95rem">${i + 1}</span>
-                    <div class="lb-name" style="font-size:.88rem">
+                  <div class="lb-row" style="padding:5px var(--space-sm);gap:var(--space-sm);flex-wrap:nowrap">
+                    <span class="lb-rank ${pc(i)}" style="font-size:.82rem;flex-shrink:0">${i + 1}</span>
+                    <div style="flex:1;min-width:0;font-size:.82rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
                       <a href="#/skater/${e.skater.id}" style="font-weight:500">${e.skater.name}</a>
                     </div>
-                    <span style="font-size:.75rem;color:var(--text-muted);flex-shrink:0">${e.landed}/${e.total}</span>
-                    <div style="flex:1;max-width:120px;min-width:60px">
-                      <div class="landing-bar" style="height:6px">
+                    <span style="font-size:.7rem;color:var(--text-muted);flex-shrink:0;white-space:nowrap">${e.landed}/${e.total}</span>
+                    <div style="width:50px;flex-shrink:0">
+                      <div class="landing-bar" style="height:5px">
                         <div class="landing-fill" style="width:${Math.round(e.rate * 100)}%"></div>
                       </div>
                     </div>
-                    <span class="lb-score" style="font-size:.95rem;min-width:3.5rem;text-align:right">${pct(e.rate)}</span>
+                    <span class="lb-score" style="font-size:.88rem;width:3rem;text-align:right;flex-shrink:0">${pct(e.rate)}</span>
                   </div>`).join('')}
               </div>`).join('')}
           </div>
