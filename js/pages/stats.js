@@ -123,6 +123,12 @@ async function renderStats() {
 
   function pct(r) { return (r*100).toFixed(1)+'%'; }
   function pc(i)  { if(i===0)return 'r1'; if(i===1)return 'r2'; if(i===2)return 'r3'; return ''; }
+  function shortName(name) {
+    if (!name) return '';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return name;
+    return parts[0][0].toUpperCase() + '. ' + parts.slice(1).join(' ');
+  }
 
   function lbRow(i, name, flag, sub, score) {
     return `<div class="lb-row">
@@ -237,7 +243,7 @@ async function renderStats() {
                   <div class="lb-row" style="padding:5px var(--space-sm);gap:var(--space-sm);flex-wrap:nowrap">
                     <span class="lb-rank ${pc(i)}" style="font-size:.82rem;flex-shrink:0">${i + 1}</span>
                     <div style="flex:1;min-width:0;font-size:.82rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">
-                      <a href="#/skater/${e.skater.id}" style="font-weight:500">${e.skater.name}</a>
+                      <a href="#/skater/${e.skater.id}" style="font-weight:500">${shortName(e.skater.name)}</a>
                     </div>
                     <span style="font-size:.7rem;color:var(--text-muted);flex-shrink:0;white-space:nowrap">${e.landed}/${e.total}</span>
                     <div style="width:50px;flex-shrink:0">
@@ -245,7 +251,6 @@ async function renderStats() {
                         <div class="landing-fill" style="width:${Math.round(e.rate * 100)}%"></div>
                       </div>
                     </div>
-                    <span class="lb-score" style="font-size:.88rem;width:3rem;text-align:right;flex-shrink:0">${pct(e.rate)}</span>
                   </div>`).join('')}
               </div>`).join('')}
           </div>
