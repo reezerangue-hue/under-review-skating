@@ -374,12 +374,12 @@ p  { line-height: 1.65; }
 .ultra-c-glow { position: relative; }
 .ultra-c-glow::after { display: none; }
 
-/* UC element cards get forest-green bg + cream text */
+/* UC element cards get a lighter green bg + cream text */
 .element-card.ultra-c-element {
-  background: var(--forest) !important;
-  border-color: var(--forest) !important;
+  background: #4A7A35 !important;
+  border-color: #4A7A35 !important;
 }
-.element-card.ultra-c-element:hover { background: #385E25 !important; border-color: #385E25 !important; }
+.element-card.ultra-c-element:hover { background: #3D6828 !important; border-color: #3D6828 !important; }
 .element-card.ultra-c-element .elem-code   { color: var(--cream) !important; }
 .element-card.ultra-c-element .elem-name   { color: rgba(245,240,232,0.70) !important; }
 .element-card.ultra-c-element .elem-num    { color: rgba(245,240,232,0.50) !important; }
@@ -391,6 +391,15 @@ p  { line-height: 1.65; }
 .element-card.ultra-c-element .uc-landing-label { color: rgba(245,240,232,0.52) !important; }
 .element-card.ultra-c-element .landing-bar { background: rgba(245,240,232,0.2) !important; }
 .element-card.ultra-c-element .landing-fill { background: var(--sage) !important; }
+/* Exec badges on UC cards: cream base so they're readable on green */
+.element-card.ultra-c-element .exec-badge                          { color: rgba(245,240,232,0.88) !important; border-color: rgba(245,240,232,0.35) !important; }
+.element-card.ultra-c-element .exec-Landed,
+.element-card.ultra-c-element .exec-Clean                          { color: var(--light-sage) !important; border-color: var(--light-sage) !important; }
+.element-card.ultra-c-element .exec-Fall,
+.element-card.ultra-c-element .exec-Invalid,
+.element-card.ultra-c-element .exec-RotationalFall                 { color: #f09090 !important; border-color: #f09090 !important; }
+.element-card.ultra-c-element .exec-Downgraded,
+.element-card.ultra-c-element .exec-MissedRequirement              { color: #c9a8f0 !important; border-color: #c9a8f0 !important; }
 
 /* ====================================================
    LOADING STATE
