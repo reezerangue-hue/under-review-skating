@@ -48,20 +48,41 @@ async function renderStats() {
     .sort((a,b)=>b.avg-a.avg)
     .slice(0,10);
 
-  /* Ultra-C frequency */
+  /* Helper: extract individual UC jump codes from a (possibly combined) element code.
+     Single elements return their base code; combinations split on '+' and keep only
+     the parts that are individually UC (quads or 3A). Modifiers like <, !, e are stripped.
+     e.g. '4Lz+3T' → ['4Lz'],  '4Lz+4T' → ['4Lz','4T'],  '4Lz' → ['4Lz'] */
+  function extractUCJumps(elementCode) {
+    const parts = elementCode.split('+');
+    if (parts.length === 1) {
+      const m = elementCode.match(/^(\d+[A-Za-z]+)/);
+      return m ? [m[1]] : [elementCode];
+    }
+    return parts
+      .map(part => { const m = part.match(/^(\d+[A-Za-z]+)/); return m ? m[1] : null; })
+      .filter(j => j && (/^4/.test(j) || j === '3A'));
+  }
+
+  /* Ultra-C frequency — bucket by base jump type, not raw combination code */
   const ucFreq = {};
-  elements.filter(e=>e.is_ultra_c).forEach(e=>{ ucFreq[e.element_code]=(ucFreq[e.element_code]||0)+1; });
+  elements.filter(e=>e.is_ultra_c).forEach(e=>{
+    extractUCJumps(e.element_code).forEach(jump => {
+      ucFreq[jump] = (ucFreq[jump] || 0) + 1;
+    });
+  });
   const ucFreqList = Object.entries(ucFreq).sort((a,b)=>b[1]-a[1]).slice(0,15)
     .map(([code,count])=>({ label:code, value:count, decimals:0 }));
 
-  /* Landing rate by element — one bucket per UC element code */
+  /* Landing rate by element — one bucket per base UC jump type */
   const ucByElem = {};
   elements.filter(e => e.is_ultra_c).forEach(e => {
-    if (!ucByElem[e.element_code]) ucByElem[e.element_code] = { name: e.element_name || '', skaters: {} };
-    if (!ucByElem[e.element_code].skaters[e.skater_id])
-      ucByElem[e.element_code].skaters[e.skater_id] = { total: 0, landed: 0 };
-    ucByElem[e.element_code].skaters[e.skater_id].total++;
-    if (e.execution === 'Landed') ucByElem[e.element_code].skaters[e.skater_id].landed++;
+    extractUCJumps(e.element_code).forEach(jump => {
+      if (!ucByElem[jump]) ucByElem[jump] = { name: '', skaters: {} };
+      if (!ucByElem[jump].skaters[e.skater_id])
+        ucByElem[jump].skaters[e.skater_id] = { total: 0, landed: 0 };
+      ucByElem[jump].skaters[e.skater_id].total++;
+      if (e.execution === 'Landed') ucByElem[jump].skaters[e.skater_id].landed++;
+    });
   });
 
   const elementBreakdown = Object.entries(ucByElem)
