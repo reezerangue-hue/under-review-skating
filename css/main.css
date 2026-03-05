@@ -18,8 +18,8 @@
 
   /* Semantic aliases used by inline styles in JS */
   --text-primary:   #1C1C1A;
-  --text-secondary: rgba(28, 28, 26, 0.60);
-  --text-muted:     rgba(28, 28, 26, 0.40);
+  --text-secondary: rgba(28, 28, 26, 0.72);
+  --text-muted:     rgba(28, 28, 26, 0.55);
 
   /* Legacy glass vars remapped to new system */
   --glass-bg:     #FFFFFF;
