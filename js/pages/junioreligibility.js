@@ -4,8 +4,8 @@
  * in Junior-tagged competitions this season. Auto-advances each season.
  *
  * Season logic (ISU-style June 30 cutoff):
- *   Season YYYY-(YYYY+1): eligible birth range = June 30 YYYY-18 → June 30 YYYY-17
- *   e.g. 2025-2026 → born June 30 2007 through June 30 2008
+ *   Season YYYY-(YYYY+1): eligible birth range = June 30 YYYY-17 → June 30 YYYY-16
+ *   e.g. 2025-2026 → born June 30 2008 through June 30 2009
  */
 async function renderJuniorEligibility() {
   const app = document.getElementById('app');
@@ -26,8 +26,8 @@ async function renderJuniorEligibility() {
   if (currentSeason) {
     const seasonStartYear = parseInt(currentSeason.split('-')[0], 10);
     if (!isNaN(seasonStartYear)) {
-      birthDateMin = new Date(`${seasonStartYear - 18}-06-30`);
-      birthDateMax = new Date(`${seasonStartYear - 17}-06-30`);
+      birthDateMin = new Date(seasonStartYear - 17, 5, 30); // June 30, local time
+      birthDateMax = new Date(seasonStartYear - 16, 5, 30);
       nextSeason   = `${seasonStartYear + 1}-${seasonStartYear + 2}`;
     }
   }
@@ -51,7 +51,8 @@ async function renderJuniorEligibility() {
   /* ── Filter + enrich skaters ───────────────────────────────────────── */
   function parseDOB(str) {
     if (!str) return null;
-    const d = new Date(str);
+    const parts = String(str).split('-');
+    const d = parts.length === 3 ? new Date(+parts[0], +parts[1] - 1, +parts[2]) : new Date(str);
     return isNaN(d) ? null : d;
   }
 

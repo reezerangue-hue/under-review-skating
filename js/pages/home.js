@@ -144,7 +144,8 @@ async function renderHome() {
   function placeClass(p) { if (p===1) return 'gold'; if (p===2) return 'silver'; if (p===3) return 'bronze'; return ''; }
   function formatDate(d) {
     if (!d) return '';
-    const dt = new Date(d);
+    const parts = String(d).split('-');
+    const dt = parts.length === 3 ? new Date(+parts[0], +parts[1] - 1, +parts[2]) : new Date(d);
     return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 

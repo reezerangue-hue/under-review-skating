@@ -76,12 +76,15 @@ async function renderSkater({ id }) {
 
   function formatDate(d) {
     if (!d) return '';
-    const dt = new Date(d);
+    const parts = String(d).split('-');
+    const dt = parts.length === 3 ? new Date(+parts[0], +parts[1] - 1, +parts[2]) : new Date(d);
     return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
   function age(bday) {
     if (!bday) return '';
-    const b = new Date(bday); if (isNaN(b)) return '';
+    const bparts = String(bday).split('-');
+    const b = bparts.length === 3 ? new Date(+bparts[0], +bparts[1] - 1, +bparts[2]) : new Date(bday);
+    if (isNaN(b)) return '';
     let a = new Date().getFullYear() - b.getFullYear();
     if (new Date() < new Date(new Date().getFullYear(), b.getMonth(), b.getDate())) a--;
     return a;

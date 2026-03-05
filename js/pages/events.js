@@ -40,7 +40,8 @@ async function renderEvents() {
   function placeClass(i) { if (i === 0) return 'r1'; if (i === 1) return 'r2'; if (i === 2) return 'r3'; return ''; }
   function formatDate(d) {
     if (!d) return '';
-    const dt = new Date(d);
+    const parts = String(d).split('-');
+    const dt = parts.length === 3 ? new Date(+parts[0], +parts[1] - 1, +parts[2]) : new Date(d);
     return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
