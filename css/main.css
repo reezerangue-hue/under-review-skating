@@ -308,12 +308,13 @@ p  { line-height: 1.65; }
   font-weight: 900;
   font-size: clamp(4.5rem, 15vw, 11rem);
   line-height: 0.86;
-  color: var(--cream);
+  color: var(--charcoal);
   text-shadow: none;
   margin-bottom: var(--space-lg);
   text-transform: lowercase;
   letter-spacing: -0.03em;
 }
+.hero .hero-title { color: var(--cream); }
 
 .hero-sub {
   font-family: var(--font-serif);
