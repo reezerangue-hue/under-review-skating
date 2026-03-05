@@ -4,12 +4,13 @@
 async function renderSkater({ id }) {
   const app = document.getElementById('app');
 
-  const [skater, allResults, allComps, stats, galleryImages] = await Promise.all([
+  const [skater, allResults, allComps, stats, galleryImages, allResultsGlobal] = await Promise.all([
     SheetsDB.getSkater(id),
     SheetsDB.getSkaterResults(id),
     SheetsDB.getCompetitions(),
     SheetsDB.getSkaterStats(id),
     SheetsDB.getSkaterGallery(id),
+    SheetsDB.getResults(),
   ]);
 
   if (!skater) {
@@ -24,6 +25,18 @@ async function renderSkater({ id }) {
   }
 
   const compMap = Object.fromEntries(allComps.map(c => [c.id, c]));
+
+  /* Overall placement per competition: rank by combined SP+FS total across all skaters */
+  const overallRankByComp = {};
+  [...new Set(allResults.map(r => r.competition_id))].forEach(compId => {
+    const combined = {};
+    allResultsGlobal.filter(r => r.competition_id === compId && r.total_score > 0).forEach(r => {
+      combined[r.skater_id] = (combined[r.skater_id] || 0) + r.total_score;
+    });
+    const ranked = Object.entries(combined).sort((a, b) => b[1] - a[1]);
+    const pos = ranked.findIndex(([sid]) => sid === id);
+    overallRankByComp[compId] = pos >= 0 ? pos + 1 : null;
+  });
 
   const resultsByComp = {};
   allResults.forEach(r => {
@@ -189,8 +202,8 @@ async function renderSkater({ id }) {
               const sp    = cr.find(r => r.segment==='Short Program');
               const fs    = cr.find(r => r.segment==='Free Skate');
               const entry = cr.some(r => r.segment==='Entry') && !sp && !fs;
-              const best  = cr.reduce((b,r)=>r.placement&&r.placement<b?r.placement:b,999);
               const nonFinish = cr.find(r => r.placement === 'DSQ' || r.placement === 'WD');
+              const overallPlacement = overallRankByComp[comp.id] ?? null;
               return `
                 <a href="#/competition/${comp.id}" class="comp-card">
                   <div style="display:flex;align-items:center;gap:var(--space-md);flex-wrap:wrap;justify-content:space-between">
@@ -200,7 +213,7 @@ async function renderSkater({ id }) {
                         <span class="level-badge ${levelClass(comp.level)}">${comp.level||'Event'}</span>
                         ${comp.location?`<span>${comp.location}</span>`:''}
                         <span>${formatDate(comp.date)}</span>
-                        ${nonFinish?`<span class="label" style="color:hsl(0,90%,60%);border-color:hsl(0,90%,60%)">${nonFinish.placement}</span>`:best<999?`<span class="label label-gold">P${best}</span>`:''}
+                        ${nonFinish?`<span class="label" style="color:hsl(0,90%,60%);border-color:hsl(0,90%,60%)">${nonFinish.placement}</span>`:overallPlacement?`<span class="label label-gold">P${overallPlacement}</span>`:''}
                       </div>
                     </div>
                     <div class="score-row" style="gap:var(--space-lg)">
