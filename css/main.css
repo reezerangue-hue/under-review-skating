@@ -644,6 +644,12 @@ p  { line-height: 1.65; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: var(--space-lg); }
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--space-lg); }
 .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-md); }
+
+/* Skaters directory: fixed-size cards so filtered results don't stretch to fill */
+#skaters-grid {
+  grid-template-columns: repeat(auto-fill, minmax(175px, 210px));
+  justify-content: start;
+}
 .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-md); }
 
 /* ====================================================
