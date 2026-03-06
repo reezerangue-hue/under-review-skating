@@ -13,9 +13,10 @@ async function renderSkaters() {
     return seasons[seasons.length - 1] || null;
   })();
   const currentSeasonCompIds = new Set(competitions.filter(c => c.season === currentSeason).map(c => c.id));
-  const activeIds = new Set(
-    results.filter(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0).map(r => r.skater_id)
-  );
+  const activeIds = new Set([
+    ...results.filter(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0).map(r => r.skater_id),
+    ...skaters.filter(s => s.season_best_short > 0 || s.season_best_free > 0 || s.season_best_total > 0).map(s => s.id),
+  ]);
 
   /* Sorted alphabetically */
   const sorted = [...skaters].sort((a, b) => a.name.localeCompare(b.name));

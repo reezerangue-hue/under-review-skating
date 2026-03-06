@@ -44,7 +44,8 @@ async function renderSkater({ id }) {
     return seasons[seasons.length - 1] || null;
   })();
   const currentSeasonCompIds = new Set(allComps.filter(c => c.season === currentSeason).map(c => c.id));
-  const isActive = allResults.some(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0);
+  const isActive = allResults.some(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0) ||
+    skater.season_best_short > 0 || skater.season_best_free > 0 || skater.season_best_total > 0;
 
   const spSeason = spResults.filter(r => currentSeasonCompIds.has(r.competition_id));
   const fsSeason = fsResults.filter(r => currentSeasonCompIds.has(r.competition_id));
