@@ -33,7 +33,7 @@ async function renderStats() {
         const sk = skaterMap[e.skater_id];
         if (!sk || !sk.country_code) return;
         const cc = sk.country_code.toUpperCase();
-        if (!nationMedals[cc]) nationMedals[cc] = { gold:0, silver:0, bronze:0, flag:Nav.getFlagEmoji(cc) };
+        if (!nationMedals[cc]) nationMedals[cc] = { gold:0, silver:0, bronze:0, cc, flag:Nav.getFlagEmoji(cc) };
         if (idx === 0) nationMedals[cc].gold++;
         if (idx === 1) nationMedals[cc].silver++;
         if (idx === 2) nationMedals[cc].bronze++;
@@ -245,7 +245,9 @@ async function renderStats() {
                 ${nationLeaderboard.map((n, i) => `
                 <tr style="border-bottom:1px solid var(--border)">
                   <td style="padding:var(--space-sm) var(--space-md);color:var(--text-muted)">${i + 1}</td>
-                  <td style="padding:var(--space-sm) var(--space-md);font-size:1.6rem;line-height:1">${n.flag}</td>
+                  <td style="padding:var(--space-sm) var(--space-md)">
+                    <span style="font-size:1.4rem;vertical-align:middle;margin-right:6px">${n.flag}</span><span style="font-size:.78rem;font-weight:700;letter-spacing:.1em;vertical-align:middle;opacity:.7">${n.cc}</span>
+                  </td>
                   <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.gold   || '—'}</td>
                   <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.silver || '—'}</td>
                   <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.bronze || '—'}</td>
