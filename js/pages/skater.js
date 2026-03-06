@@ -4,13 +4,14 @@
 async function renderSkater({ id }) {
   const app = document.getElementById('app');
 
-  const [skater, allResults, allComps, stats, galleryImages, allResultsGlobal] = await Promise.all([
+  const [skater, allResults, allComps, stats, galleryImages, allResultsGlobal, allSkaters] = await Promise.all([
     SheetsDB.getSkater(id),
     SheetsDB.getSkaterResults(id),
     SheetsDB.getCompetitions(),
     SheetsDB.getSkaterStats(id),
     SheetsDB.getSkaterGallery(id),
     SheetsDB.getResults(),
+    SheetsDB.getSkaters(),
   ]);
 
   if (!skater) {
@@ -62,6 +63,25 @@ async function renderSkater({ id }) {
   const pbShort = Math.max(skater.personal_best_short || 0, computedPbShort);
   const pbFree  = Math.max(skater.personal_best_free  || 0, computedPbFree);
   const pbTotal = Math.max(skater.personal_best_total || 0, computedPbTotal);
+
+  /* ── All-time rank across all skaters ─────────────────────── */
+  const pbTotalBySkater = {};
+  allResultsGlobal.filter(r => r.total_score > 0).forEach(r => {
+    const key = `${r.skater_id}__${r.competition_id}`;
+    if (!pbTotalBySkater[r.skater_id]) pbTotalBySkater[r.skater_id] = {};
+    pbTotalBySkater[r.skater_id][r.competition_id] =
+      (pbTotalBySkater[r.skater_id][r.competition_id] || 0) + r.total_score;
+  });
+  const allTimeRanked = allSkaters
+    .map(s => {
+      const compTotals = Object.values(pbTotalBySkater[s.id] || {});
+      const computed   = compTotals.length ? Math.max(...compTotals) : 0;
+      return { id: s.id, score: Math.max(s.personal_best_total || 0, computed) };
+    })
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score);
+  const allTimeRankIdx = allTimeRanked.findIndex(s => s.id === id);
+  const allTimeRank    = allTimeRankIdx >= 0 ? allTimeRankIdx + 1 : 0;
   const sbShort = Math.max(skater.season_best_short   || 0, computedSbShort);
   const sbFree  = Math.max(skater.season_best_free    || 0, computedSbFree);
   const sbTotal = Math.max(skater.season_best_total   || 0, computedSbTotal);
@@ -149,6 +169,7 @@ async function renderSkater({ id }) {
             <p class="profile-country">
               ${flag} ${skater.country||''}${skater.birthday ? ` · Age ${age(skater.birthday)}` : ''}
               <span style="display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-full);background:${isActive ? 'var(--forest)' : 'rgba(28,28,26,.12)'};color:${isActive ? 'var(--white)' : 'var(--text-muted)'};margin-left:var(--space-sm);vertical-align:middle">${isActive ? 'Active' : 'Inactive'}</span>
+              ${allTimeRank ? `<a href="#/rankings" style="display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-full);background:var(--light-sage);color:var(--forest);margin-left:var(--space-sm);vertical-align:middle;text-decoration:none">#${allTimeRank} All Time</a>` : ''}
             </p>
             ${skater.bio ? `<p class="profile-bio">${skater.bio}</p>` : ''}
           </div>
