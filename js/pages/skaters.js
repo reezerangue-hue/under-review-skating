@@ -5,7 +5,17 @@
 async function renderSkaters() {
   const app = document.getElementById('app');
 
-  const skaters = await SheetsDB.getSkaters();
+  const { skaters, competitions, results } = await SheetsDB.getAllData();
+
+  /* Determine active skater IDs (scored result in current season) */
+  const currentSeason = (() => {
+    const seasons = [...new Set(competitions.filter(c => c.season).map(c => c.season))].sort();
+    return seasons[seasons.length - 1] || null;
+  })();
+  const currentSeasonCompIds = new Set(competitions.filter(c => c.season === currentSeason).map(c => c.id));
+  const activeIds = new Set(
+    results.filter(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0).map(r => r.skater_id)
+  );
 
   /* Sorted alphabetically */
   const sorted = [...skaters].sort((a, b) => a.name.localeCompare(b.name));
@@ -42,6 +52,11 @@ async function renderSkaters() {
             <option value="">All Nations</option>
             ${nations.map(n => `<option value="${n}">${n}</option>`).join('')}
           </select>
+          <select id="skaters-status" class="filter-select" aria-label="Filter by status">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           <span id="skaters-count" style="font-size:.78rem;color:var(--text-muted);margin-left:auto">
             ${sorted.length} skater${sorted.length !== 1 ? 's' : ''}
           </span>
@@ -62,6 +77,7 @@ async function renderSkaters() {
   /* Live filtering */
   const searchEl = document.getElementById('skaters-search');
   const nationEl = document.getElementById('skaters-nation');
+  const statusEl = document.getElementById('skaters-status');
   const countEl  = document.getElementById('skaters-count');
   const gridEl   = document.getElementById('skaters-grid');
   const emptyEl  = document.getElementById('skaters-empty');
@@ -69,9 +85,11 @@ async function renderSkaters() {
   function applyFilters() {
     const q       = searchEl.value.trim().toLowerCase();
     const nation  = nationEl.value;
+    const status  = statusEl.value;
     const visible = sorted.filter(s =>
       (!q      || s.name.toLowerCase().includes(q)) &&
-      (!nation || s.country === nation)
+      (!nation || s.country === nation) &&
+      (!status || (status === 'active' ? activeIds.has(s.id) : !activeIds.has(s.id)))
     );
 
     gridEl.innerHTML  = visible.map(s => skaterCard(s)).join('');
@@ -81,6 +99,7 @@ async function renderSkaters() {
 
   searchEl.addEventListener('input', applyFilters);
   nationEl.addEventListener('change', applyFilters);
+  statusEl.addEventListener('change', applyFilters);
 }
 
 function skaterCard(s) {
