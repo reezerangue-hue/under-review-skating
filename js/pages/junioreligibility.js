@@ -79,16 +79,13 @@ async function renderJuniorEligibility() {
       juniorResults.forEach(r => {
         byComp[r.competition_id] = (byComp[r.competition_id] || 0) + r.total_score;
       });
-      const bestTotal = Object.values(byComp).length
-        ? Math.max(...Object.values(byComp))
-        : 0;
+      const bestEntry = Object.entries(byComp).sort((a, b) => b[1] - a[1])[0];
+      const bestTotal = bestEntry ? bestEntry[1] : 0;
+      const topCompName = bestEntry
+        ? (compNameById[bestEntry[0]] || '—')
+        : ([...skaterCompNames[s.id]][0] || '—');
 
-      return {
-        ...s,
-        dob,
-        compNames: [...skaterCompNames[s.id]],
-        bestTotal,
-      };
+      return { ...s, dob, topCompName, bestTotal };
     })
     .sort((a, b) => b.bestTotal - a.bestTotal || a.name.localeCompare(b.name));
 
@@ -112,10 +109,12 @@ async function renderJuniorEligibility() {
           juniorResults.forEach(r => {
             byComp[r.competition_id] = (byComp[r.competition_id] || 0) + r.total_score;
           });
-          const bestTotal = Object.values(byComp).length
-            ? Math.max(...Object.values(byComp))
-            : 0;
-          return { ...s, dob, compNames: [...skaterCompNames[s.id]], bestTotal };
+          const bestEntry = Object.entries(byComp).sort((a, b) => b[1] - a[1])[0];
+          const bestTotal = bestEntry ? bestEntry[1] : 0;
+          const topCompName = bestEntry
+            ? (compNameById[bestEntry[0]] || '—')
+            : ([...skaterCompNames[s.id]][0] || '—');
+          return { ...s, dob, topCompName, bestTotal };
         })
         .sort((a, b) => b.bestTotal - a.bestTotal || a.name.localeCompare(b.name))
     : [];
@@ -148,7 +147,7 @@ async function renderJuniorEligibility() {
               <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">#</th>
               <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Skater</th>
               <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Date of Birth</th>
-              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Junior Events This Season</th>
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Top Junior Event This Season</th>
               <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);text-align:right">Best Total</th>
             </tr>
           </thead>
@@ -162,7 +161,7 @@ async function renderJuniorEligibility() {
                 ${s.country ? `<span style="font-size:.76rem;color:var(--text-muted);margin-left:2px">${s.country}</span>` : ''}
               </td>
               <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary)">${formatDate(s.dob)}</td>
-              <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary);font-size:.8rem">${s.compNames.join(', ')}</td>
+              <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary);font-size:.8rem">${s.topCompName}</td>
               <td style="padding:var(--space-sm) var(--space-md);text-align:right;font-weight:600;font-family:var(--font-mono)">${s.bestTotal > 0 ? s.bestTotal.toFixed(2) : '—'}</td>
             </tr>`).join('')}
           </tbody>
