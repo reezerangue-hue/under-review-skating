@@ -44,6 +44,7 @@ async function renderSkater({ id }) {
     return seasons[seasons.length - 1] || null;
   })();
   const currentSeasonCompIds = new Set(allComps.filter(c => c.season === currentSeason).map(c => c.id));
+  const isActive = allResults.some(r => currentSeasonCompIds.has(r.competition_id) && r.total_score > 0);
 
   const spSeason = spResults.filter(r => currentSeasonCompIds.has(r.competition_id));
   const fsSeason = fsResults.filter(r => currentSeasonCompIds.has(r.competition_id));
@@ -144,7 +145,10 @@ async function renderSkater({ id }) {
             : `<div class="profile-photo-placeholder" aria-hidden="true">✦</div>`}
           <div>
             <h1 class="profile-name">${skater.name}</h1>
-            <p class="profile-country">${flag} ${skater.country||''}${skater.birthday ? ` · Age ${age(skater.birthday)}` : ''}</p>
+            <p class="profile-country">
+              ${flag} ${skater.country||''}${skater.birthday ? ` · Age ${age(skater.birthday)}` : ''}
+              <span style="display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:var(--radius-full);background:${isActive ? 'var(--forest)' : 'rgba(28,28,26,.12)'};color:${isActive ? 'var(--white)' : 'var(--text-muted)'};margin-left:var(--space-sm);vertical-align:middle">${isActive ? 'Active' : 'Inactive'}</span>
+            </p>
             ${skater.bio ? `<p class="profile-bio">${skater.bio}</p>` : ''}
           </div>
         </div>
