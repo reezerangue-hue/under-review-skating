@@ -133,9 +133,9 @@ async function renderCompetition({ id }) {
 
   /* Podium helper */
   const MEDAL = {
-    1: { color: '#C9A84C', size: '112px', podiumH: '150px' },
-    2: { color: '#9BA5AD', size: '88px',  podiumH: '110px' },
-    3: { color: '#A0714F', size: '80px',  podiumH: '88px'  },
+    1: { color: '#C9A84C', size: 'min(112px,22vw)', podiumW: 'min(130px,26vw)', podiumH: '150px' },
+    2: { color: '#9BA5AD', size: 'min(88px,18vw)',  podiumW: 'min(100px,20vw)', podiumH: '110px' },
+    3: { color: '#A0714F', size: 'min(80px,16vw)',  podiumW: 'min(100px,20vw)', podiumH: '88px'  },
   };
   function podiumPlace(d, place) {
     const m = MEDAL[place];
@@ -143,13 +143,13 @@ async function renderCompetition({ id }) {
       ? `<img src="${d.photo_url}" alt="${d.skater_name}" style="width:${m.size};height:${m.size};border-radius:50%;object-fit:cover;border:3px solid ${m.color};display:block">`
       : `<div style="width:${m.size};height:${m.size};border-radius:50%;background:var(--cream);border:3px solid ${m.color};display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.4rem">✦</div>`;
     return `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xs)">
-        <a href="#/skater/${d.skater_id}" style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xs);text-decoration:none">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xs);min-width:0">
+        <a href="#/skater/${d.skater_id}" style="display:flex;flex-direction:column;align-items:center;gap:var(--space-xs);text-decoration:none;width:100%">
           ${photo}
-          <p style="font-weight:700;font-size:${place===1?'1rem':'.85rem'};text-align:center;max-width:130px;line-height:1.3;margin-top:4px">${d.skater_name}</p>
-          <p style="font-family:var(--font-mono);font-size:${place===1?'.9rem':'.78rem'};color:var(--text-secondary)">${d.total_score.toFixed(2)}</p>
+          <p style="font-weight:700;font-size:${place===1?'clamp(.78rem,2.5vw,1rem)':'clamp(.7rem,2vw,.85rem)'};text-align:center;max-width:${m.podiumW};line-height:1.3;margin-top:4px;word-break:break-word">${d.skater_name}</p>
+          <p style="font-family:var(--font-mono);font-size:${place===1?'clamp(.75rem,2vw,.9rem)':'clamp(.68rem,1.8vw,.78rem)'};color:var(--text-secondary)">${d.total_score.toFixed(2)}</p>
         </a>
-        <div style="width:${place===1?'130px':'100px'};height:${m.podiumH};background:${m.color};border-radius:6px 6px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:10px;margin-top:var(--space-sm)">
+        <div style="width:${m.podiumW};height:${m.podiumH};background:${m.color};border-radius:6px 6px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:10px;margin-top:var(--space-sm)">
           <span style="font-family:var(--font-display);font-weight:900;font-size:1.8rem;color:rgba(255,255,255,.6)">${place}</span>
         </div>
       </div>`;
@@ -180,7 +180,7 @@ async function renderCompetition({ id }) {
             <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Final Standings</p>
             <h2 class="section-title">Podium</h2>
           </div>
-          <div style="display:flex;align-items:flex-end;justify-content:center;gap:var(--space-xl)">
+          <div class="podium-wrap">
             ${distData[1] ? podiumPlace(distData[1], 2) : ''}
             ${podiumPlace(distData[0], 1)}
             ${distData[2] ? podiumPlace(distData[2], 3) : ''}

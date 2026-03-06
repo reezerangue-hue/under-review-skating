@@ -1092,6 +1092,17 @@ p  { line-height: 1.65; }
 @keyframes pageIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
 /* ====================================================
+   PODIUM
+   ==================================================== */
+.podium-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-xl);
+}
+.podium-wrap > div { flex-shrink: 0; }
+
+/* ====================================================
    GALLERY CAROUSEL
    ==================================================== */
 .gallery-carousel { position: relative; display: flex; align-items: center; gap: var(--space-sm); }
@@ -1168,8 +1179,22 @@ p  { line-height: 1.65; }
     margin-left: calc(-1 * var(--space-md));
     margin-right: calc(-1 * var(--space-md));
   }
-  .score-row { gap: var(--space-lg); }
+  .score-row { gap: var(--space-md); flex-wrap: wrap; }
   .pb-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Gallery: 2 slides */
+  .gallery-slide { flex: 0 0 calc(50% - 6px); }
+
+  /* Podium: tighter spacing, slightly smaller */
+  .podium-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  /* Comp cards: stack name and scores */
+  .comp-card .score-row { justify-content: flex-start; }
 }
 
 /* ====================================================
@@ -1186,4 +1211,59 @@ p  { line-height: 1.65; }
   .lb-score         { font-size: 0.88rem; }
   .hero-title       { font-size: clamp(3rem, 16vw, 5.5rem); }
   .hero             { padding-bottom: 64px; }
+
+  /* Nav: smaller brand to save space */
+  .nav-brand { padding: 7px 14px; font-size: 0.88rem; }
+  .search-input { width: 90px; }
+  .search-input:focus { width: 120px; }
+
+  /* Filter bars: search fills width, selects share a row */
+  #skaters-search { width: 100%; }
+  #skaters-nation,
+  #skaters-status { flex: 1 1 0; min-width: 0; }
+  #events-season-filter,
+  #events-level-filter { flex: 1 1 0; min-width: 0; }
+
+  /* Skater grid: 2 columns that fit narrow phones */
+  #skaters-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    justify-content: stretch !important;
+  }
+
+  /* Gallery: 1 slide */
+  .gallery-slide { flex: 0 0 100%; }
+  .gallery-track { gap: 0; }
+
+  /* Score display: tighter */
+  .score-row { gap: var(--space-sm); }
+  .score-value { font-size: 1.8rem; }
+  .score-value.sm { font-size: 1.1rem; }
+
+  /* Tables: tighter padding, smaller text */
+  .data-table { font-size: 0.76rem; }
+  .data-table th,
+  .data-table td { padding: 7px 8px; }
+
+  /* Leaderboard rows: tighter */
+  .lb-row { gap: var(--space-sm); padding: 6px var(--space-sm); }
+  .lb-name { font-size: 0.78rem; }
+
+  /* Element cards on protocol */
+  .elem-code { font-size: 1.4rem; }
+  .elem-name { font-size: 0.66rem; }
+
+  /* Protocol summary */
+  .protocol-summary { padding: var(--space-md); }
+
+  /* Section title */
+  .section-title { font-size: clamp(1.2rem, 5vw, 1.8rem); }
+
+  /* Podium: stack vertically on very small screens */
+  .podium-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-sm);
+  }
+  .podium-wrap > div { flex-shrink: 1; }
 }
