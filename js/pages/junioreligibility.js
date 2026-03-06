@@ -180,7 +180,7 @@ async function renderJuniorEligibility() {
           <p style="font-size:.72rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--space-sm)">
             ${Sparkles.html('sparkle-sm')} ${currentSeason || 'Current Season'} ${Sparkles.html('sparkle-sm')}
           </p>
-          <h1 class="hero-title" style="font-size:clamp(2rem,8vw,5rem)">Junior Eligibility</h1>
+          <h1 class="hero-title" style="font-size:clamp(2rem,8vw,5rem)">Eligibility</h1>
         </section>
 
         <section style="margin-bottom:var(--space-2xl)">
