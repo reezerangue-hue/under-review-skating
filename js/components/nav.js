@@ -25,7 +25,7 @@ const Nav = (() => {
           <a href="#/events"  class="nav-link" data-route="events">Events</a>
           <a href="#/skaters" class="nav-link" data-route="skaters">Skaters</a>
           <a href="#/stats"   class="nav-link" data-route="stats">Statistics</a>
-          <a href="#/junior-eligibility" class="nav-link" data-route="junior-eligibility">Junior Eligibility</a>
+          <a href="#/junior-eligibility" class="nav-link" data-route="junior-eligibility">Eligibility</a>
         </nav>
         <div class="nav-actions">
           <div class="search-wrap">
