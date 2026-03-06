@@ -16,6 +16,33 @@ async function renderStats() {
     if (!comboMap[key]) comboMap[key] = { skater_id:r.skater_id, comp_id:r.competition_id, total:0 };
     comboMap[key].total += r.total_score;
   });
+
+  /* Nation medal counts */
+  const byComp = {};
+  Object.values(comboMap).forEach(e => {
+    if (!byComp[e.comp_id]) byComp[e.comp_id] = [];
+    byComp[e.comp_id].push(e);
+  });
+  const nationMedals = {};
+  Object.values(byComp).forEach(entries => {
+    entries
+      .filter(e => e.total > 0 && skaterMap[e.skater_id])
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3)
+      .forEach((e, idx) => {
+        const sk = skaterMap[e.skater_id];
+        if (!sk || !sk.country_code) return;
+        const cc = sk.country_code.toUpperCase();
+        if (!nationMedals[cc]) nationMedals[cc] = { gold:0, silver:0, bronze:0, flag:Nav.getFlagEmoji(cc) };
+        if (idx === 0) nationMedals[cc].gold++;
+        if (idx === 1) nationMedals[cc].silver++;
+        if (idx === 2) nationMedals[cc].bronze++;
+      });
+  });
+  const nationLeaderboard = Object.values(nationMedals)
+    .sort((a, b) => b.gold - a.gold || b.silver - a.silver || b.bronze - a.bronze)
+    .slice(0, 10);
+
   const topTotals = Object.values(comboMap)
     .filter(e => skaterMap[e.skater_id])
     .sort((a,b) => b.total - a.total)
@@ -193,6 +220,40 @@ async function renderStats() {
           </section>
 
         </div>
+
+        <!-- NATION LEADERBOARD -->
+        ${nationLeaderboard.length ? `
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Nations</p>
+              <h2 class="section-title">Nation Leaderboard</h2>
+            </div>
+          </div>
+          <div class="card" style="padding:var(--space-md);overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:.9rem">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border);text-align:left">
+                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">#</th>
+                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Nation</th>
+                  <th style="padding:var(--space-sm) var(--space-md);text-align:center;font-size:1.2rem">🥇</th>
+                  <th style="padding:var(--space-sm) var(--space-md);text-align:center;font-size:1.2rem">🥈</th>
+                  <th style="padding:var(--space-sm) var(--space-md);text-align:center;font-size:1.2rem">🥉</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${nationLeaderboard.map((n, i) => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:var(--space-sm) var(--space-md);color:var(--text-muted)">${i + 1}</td>
+                  <td style="padding:var(--space-sm) var(--space-md);font-size:1.6rem;line-height:1">${n.flag}</td>
+                  <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.gold   || '—'}</td>
+                  <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.silver || '—'}</td>
+                  <td style="padding:var(--space-sm) var(--space-md);text-align:center;font-weight:700">${n.bronze || '—'}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>` : ''}
 
         <!-- UC LANDING RATES -->
         ${ucLeaderboard.length ? `
