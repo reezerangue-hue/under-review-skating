@@ -4,8 +4,10 @@
  * in Junior-tagged competitions this season. Auto-advances each season.
  *
  * Season logic (ISU-style June 30 cutoff):
- *   Season YYYY-(YYYY+1): eligible birth range = July 1 YYYY-17 → June 30 YYYY-16
+ *   Senior-eligible range: July 1 YYYY-17 → June 30 YYYY-16
  *   e.g. 2025-2026 → born July 1 2008 through June 30 2009
+ *   Aging out cutoff: born on or before June 30 YYYY-18
+ *   e.g. 2025-2026 → born on or before June 30 2007
  */
 async function renderJuniorEligibility() {
   const app = document.getElementById('app');
@@ -22,13 +24,14 @@ async function renderJuniorEligibility() {
   const currentSeason = allSeasons[allSeasons.length - 1] || null;
 
   /* ── Birth-year window ─────────────────────────────────────────────── */
-  let birthDateMin = null, birthDateMax = null, nextSeason = null;
+  let birthDateMin = null, birthDateMax = null, agingOutCutoff = null, nextSeason = null;
   if (currentSeason) {
     const seasonStartYear = parseInt(currentSeason.split('-')[0], 10);
     if (!isNaN(seasonStartYear)) {
-      birthDateMin = new Date(seasonStartYear - 17, 6, 1);  // July 1, local time
-      birthDateMax = new Date(seasonStartYear - 16, 5, 30); // June 30, local time
-      nextSeason   = `${seasonStartYear + 1}-${seasonStartYear + 2}`;
+      birthDateMin    = new Date(seasonStartYear - 17, 6, 1);  // July 1, local time
+      birthDateMax    = new Date(seasonStartYear - 16, 5, 30); // June 30, local time
+      agingOutCutoff  = new Date(seasonStartYear - 18, 5, 30); // June 30, local time
+      nextSeason      = `${seasonStartYear + 1}-${seasonStartYear + 2}`;
     }
   }
 
@@ -89,6 +92,34 @@ async function renderJuniorEligibility() {
     })
     .sort((a, b) => b.bestTotal - a.bestTotal || a.name.localeCompare(b.name));
 
+  /* ── Aging-out skaters (born on or before cutoff, competed junior this season) ── */
+  const agingOut = agingOutCutoff
+    ? skaters
+        .filter(s => {
+          if (!skaterCompNames[s.id]) return false;
+          const dob = parseDOB(s.birthday);
+          if (!dob) return false;
+          return dob <= agingOutCutoff;
+        })
+        .map(s => {
+          const dob = parseDOB(s.birthday);
+          const juniorResults = results.filter(r =>
+            juniorCompIds.has(r.competition_id) &&
+            r.skater_id === s.id &&
+            r.total_score > 0
+          );
+          const byComp = {};
+          juniorResults.forEach(r => {
+            byComp[r.competition_id] = (byComp[r.competition_id] || 0) + r.total_score;
+          });
+          const bestTotal = Object.values(byComp).length
+            ? Math.max(...Object.values(byComp))
+            : 0;
+          return { ...s, dob, compNames: [...skaterCompNames[s.id]], bestTotal };
+        })
+        .sort((a, b) => b.bestTotal - a.bestTotal || a.name.localeCompare(b.name))
+    : [];
+
   /* ── Helpers ───────────────────────────────────────────────────────── */
   function formatDate(d) {
     if (!d) return '—';
@@ -100,6 +131,44 @@ async function renderJuniorEligibility() {
     : '';
 
   const nextSeasonLabel = nextSeason || 'Next Season';
+
+  /* ── Shared table renderer ─────────────────────────────────────────── */
+  function skaterTable(rows, emptyMsg) {
+    if (!rows.length) {
+      return `<div class="not-configured" style="text-align:center">
+        <h3>✦ No skaters found</h3>
+        <p>${emptyMsg}</p>
+      </div>`;
+    }
+    return `
+      <div class="card" style="padding:var(--space-md);overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+          <thead>
+            <tr style="border-bottom:1px solid var(--border);text-align:left">
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">#</th>
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Skater</th>
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Date of Birth</th>
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Junior Events This Season</th>
+              <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);text-align:right">Best Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((s, i) => `
+            <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="Router.go('/skater/${s.id}')">
+              <td style="padding:var(--space-sm) var(--space-md);color:var(--text-muted)">${i + 1}</td>
+              <td style="padding:var(--space-sm) var(--space-md)">
+                <a href="#/skater/${s.id}" onclick="event.stopPropagation()" style="font-weight:600">${s.name}</a>
+                <span style="margin-left:var(--space-sm)">${Nav.getFlagEmoji(s.country_code)}</span>
+                ${s.country ? `<span style="font-size:.76rem;color:var(--text-muted);margin-left:2px">${s.country}</span>` : ''}
+              </td>
+              <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary)">${formatDate(s.dob)}</td>
+              <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary);font-size:.8rem">${s.compNames.join(', ')}</td>
+              <td style="padding:var(--space-sm) var(--space-md);text-align:right;font-weight:600;font-family:var(--font-mono)">${s.bestTotal > 0 ? s.bestTotal.toFixed(2) : '—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
 
   /* ── Render ────────────────────────────────────────────────────────── */
   app.innerHTML = `
@@ -127,38 +196,25 @@ async function renderJuniorEligibility() {
             ${currentSeason ? `(${currentSeason})` : ''}
           </p>` : ''}
 
-          ${eligible.length ? `
-          <div class="card" style="padding:var(--space-md);overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:.88rem">
-              <thead>
-                <tr style="border-bottom:1px solid var(--border);text-align:left">
-                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">#</th>
-                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Skater</th>
-                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Date of Birth</th>
-                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)">Junior Events This Season</th>
-                  <th style="padding:var(--space-sm) var(--space-md);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);text-align:right">Best Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${eligible.map((s, i) => `
-                <tr style="border-bottom:1px solid var(--border);cursor:pointer" onclick="Router.go('/skater/${s.id}')">
-                  <td style="padding:var(--space-sm) var(--space-md);color:var(--text-muted)">${i + 1}</td>
-                  <td style="padding:var(--space-sm) var(--space-md)">
-                    <a href="#/skater/${s.id}" onclick="event.stopPropagation()" style="font-weight:600">${s.name}</a>
-                    <span style="margin-left:var(--space-sm)">${Nav.getFlagEmoji(s.country_code)}</span>
-                    ${s.country ? `<span style="font-size:.76rem;color:var(--text-muted);margin-left:2px">${s.country}</span>` : ''}
-                  </td>
-                  <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary)">${formatDate(s.dob)}</td>
-                  <td style="padding:var(--space-sm) var(--space-md);color:var(--text-secondary);font-size:.8rem">${s.compNames.join(', ')}</td>
-                  <td style="padding:var(--space-sm) var(--space-md);text-align:right;font-weight:600;font-family:var(--font-mono)">${s.bestTotal > 0 ? s.bestTotal.toFixed(2) : '—'}</td>
-                </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>` : `
-          <div class="not-configured" style="text-align:center">
-            <h3>✦ No eligible skaters found</h3>
-            <p>No skaters in the eligible birth year range have competed in a Junior event this season.</p>
-          </div>`}
+          ${skaterTable(eligible, 'No skaters in the eligible birth year range have competed in a Junior event this season.')}
+
+        </section>
+
+        <!-- AGING OUT TABLE -->
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <div>
+              <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Overaged</p>
+              <h2 class="section-title">Aging Out</h2>
+            </div>
+          </div>
+          ${agingOutCutoff ? `
+          <p style="color:var(--text-secondary);font-size:.84rem;margin-bottom:var(--space-md)">
+            Born on or before ${formatDate(agingOutCutoff)} &middot; Competed in at least one Junior event this season
+            ${currentSeason ? `(${currentSeason})` : ''}
+          </p>` : ''}
+
+          ${skaterTable(agingOut, 'No overaged skaters have competed in a Junior event this season.')}
 
         </section>
       </div>
