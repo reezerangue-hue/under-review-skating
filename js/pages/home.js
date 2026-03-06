@@ -66,17 +66,38 @@ async function renderHome() {
       seasonBestBySkater[season][skater_id] = total;
   });
 
+  /* Enrich skaters: compute PB/SB from results, override sheet value if higher */
+  const currentSeasonCompIds = new Set(
+    competitions.filter(c => c.season === (seasons[0] || null)).map(c => c.id)
+  );
+  const computedBestBySkater = {};
+  Object.values(compCombined).forEach(({ comp_id, skater_id, total }) => {
+    if (!computedBestBySkater[skater_id]) computedBestBySkater[skater_id] = { pbTotal: 0, sbTotal: 0 };
+    if (total > computedBestBySkater[skater_id].pbTotal)
+      computedBestBySkater[skater_id].pbTotal = total;
+    if (currentSeasonCompIds.has(comp_id) && total > computedBestBySkater[skater_id].sbTotal)
+      computedBestBySkater[skater_id].sbTotal = total;
+  });
+  const enrichedSkaters = skaters.map(s => {
+    const c = computedBestBySkater[s.id] || { pbTotal: 0, sbTotal: 0 };
+    return {
+      ...s,
+      personal_best_total: Math.max(s.personal_best_total || 0, c.pbTotal),
+      season_best_total:   Math.max(s.season_best_total   || 0, c.sbTotal),
+    };
+  });
+
   /* Returns top-10 skater cards for a given filter value */
   function getTopSkaters(filter) {
     if (filter === 'all-time') {
-      return [...skaters]
+      return [...enrichedSkaters]
         .filter(s => s.personal_best_total > 0)
         .sort((a, b) => b.personal_best_total - a.personal_best_total)
         .slice(0, 10)
         .map(s => ({ skater: s, score: s.personal_best_total, label: 'Personal Best' }));
     }
     if (filter === 'this-season') {
-      return [...skaters]
+      return [...enrichedSkaters]
         .filter(s => s.season_best_total > 0)
         .sort((a, b) => b.season_best_total - a.season_best_total)
         .slice(0, 10)
