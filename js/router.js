@@ -3,7 +3,8 @@
  */
 const Router = (() => {
   const routes = [];
-  let currentPath = null;
+  let currentPath  = null;
+  let previousPath = null;
 
   function addRoute(pattern, handler) {
     const paramNames = [];
@@ -23,7 +24,8 @@ const Router = (() => {
   async function dispatch() {
     const path = getPath();
     if (path === currentPath) return;
-    currentPath = path;
+    previousPath = currentPath;
+    currentPath  = path;
 
     for (const route of routes) {
       const match = path.match(route.regex);
@@ -86,6 +88,19 @@ const Router = (() => {
       </div>`;
   }
 
+  function backPath()  { return previousPath || '/'; }
+  function backLabel() {
+    const p = previousPath || '/';
+    if (!p || p === '/') return 'Home';
+    if (p.startsWith('/skaters'))            return 'Skaters';
+    if (p.startsWith('/events'))             return 'Events';
+    if (p.startsWith('/stats'))              return 'Statistics';
+    if (p.startsWith('/junior-eligibility')) return 'Eligibility';
+    if (p.startsWith('/competition/'))       return 'Event';
+    if (p.startsWith('/skater/'))            return 'Skater';
+    return 'Back';
+  }
+
   return {
     add: addRoute,
     init() {
@@ -95,5 +110,7 @@ const Router = (() => {
     go(hash) {
       window.location.hash = hash.startsWith('#') ? hash.slice(1) : hash;
     },
+    back:      backPath,
+    backLabel: backLabel,
   };
 })();

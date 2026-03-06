@@ -146,9 +146,19 @@ async function renderEvents() {
   const levelEl  = document.getElementById('events-level-filter');
   const countEl  = document.getElementById('events-count');
 
+  /* Restore saved filters */
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('events_filters') || '{}');
+    if (saved.season && seasonEl) seasonEl.value = saved.season;
+    if (saved.level  && levelEl)  levelEl.value  = saved.level;
+  } catch (_) {}
+
   function applyFilters() {
-    const season = seasonEl.value;
-    const level  = levelEl.value;
+    const season = seasonEl ? seasonEl.value : '';
+    const level  = levelEl  ? levelEl.value  : '';
+
+    try { sessionStorage.setItem('events_filters', JSON.stringify({ season, level })); } catch (_) {}
+
     let visible = 0;
     document.querySelectorAll('.event-section').forEach(section => {
       const match =
@@ -162,4 +172,5 @@ async function renderEvents() {
 
   if (seasonEl) seasonEl.addEventListener('change', applyFilters);
   if (levelEl)  levelEl.addEventListener('change', applyFilters);
+  applyFilters();
 }

@@ -137,7 +137,7 @@ async function renderSkater({ id }) {
     <div class="page-enter">
       <div class="container">
 
-        <a href="#/" class="btn" style="margin-bottom:var(--space-lg);display:inline-flex">← Back</a>
+        <a href="#${Router.back()}" onclick="event.preventDefault();window.history.back()" class="btn" style="margin-bottom:var(--space-lg);display:inline-flex">← Back to ${Router.backLabel()}</a>
 
         <!-- PROFILE HEADER -->
         <div class="profile-header">

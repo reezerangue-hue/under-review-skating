@@ -83,10 +83,21 @@ async function renderSkaters() {
   const gridEl   = document.getElementById('skaters-grid');
   const emptyEl  = document.getElementById('skaters-empty');
 
+  /* Restore saved filters */
+  try {
+    const saved = JSON.parse(sessionStorage.getItem('skaters_filters') || '{}');
+    if (saved.q)      { searchEl.value = saved.q; }
+    if (saved.nation) { nationEl.value = saved.nation; }
+    if (saved.status) { statusEl.value = saved.status; }
+  } catch (_) {}
+
   function applyFilters() {
     const q       = searchEl.value.trim().toLowerCase();
     const nation  = nationEl.value;
     const status  = statusEl.value;
+
+    try { sessionStorage.setItem('skaters_filters', JSON.stringify({ q, nation, status })); } catch (_) {}
+
     const visible = sorted.filter(s =>
       (!q      || s.name.toLowerCase().includes(q)) &&
       (!nation || s.country === nation) &&
@@ -101,6 +112,7 @@ async function renderSkaters() {
   searchEl.addEventListener('input', applyFilters);
   nationEl.addEventListener('change', applyFilters);
   statusEl.addEventListener('change', applyFilters);
+  applyFilters();
 }
 
 function skaterCard(s) {
