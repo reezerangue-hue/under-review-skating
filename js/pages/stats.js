@@ -33,7 +33,7 @@ async function renderStats() {
         const sk = skaterMap[e.skater_id];
         if (!sk || !sk.country_code) return;
         const cc = sk.country_code.toUpperCase();
-        if (!nationMedals[cc]) nationMedals[cc] = { gold:0, silver:0, bronze:0, cc, flag:Nav.getFlagEmoji(cc) };
+        if (!nationMedals[cc]) nationMedals[cc] = { gold:0, silver:0, bronze:0, cc, flag:Nav.getFlagEmoji(cc), country:sk.country||cc };
         if (idx === 0) nationMedals[cc].gold++;
         if (idx === 1) nationMedals[cc].silver++;
         if (idx === 2) nationMedals[cc].bronze++;
@@ -243,7 +243,7 @@ async function renderStats() {
               </thead>
               <tbody>
                 ${nationLeaderboard.map((n, i) => `
-                <tr style="border-bottom:1px solid var(--border)">
+                <tr style="border-bottom:1px solid var(--border);cursor:pointer" data-nation="${n.country}" onclick="sessionStorage.setItem('skaters_filters',JSON.stringify({q:'',nation:this.dataset.nation,status:''}));Router.go('/skaters')">
                   <td style="padding:var(--space-sm) var(--space-md);color:var(--text-muted)">${i + 1}</td>
                   <td style="padding:var(--space-sm) var(--space-md)">
                     <span style="font-size:1.4rem;vertical-align:middle;margin-right:6px">${n.flag}</span><span style="font-size:.78rem;font-weight:700;letter-spacing:.1em;vertical-align:middle;opacity:.7">${n.cc}</span>
