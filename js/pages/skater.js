@@ -114,8 +114,9 @@ async function renderSkater({ id }) {
       const fs  = cr.find(r => r.segment === 'Free Skate');
       const tot = cr.reduce((s, r) => s + r.total_score, 0);
       const hasNonFinish = cr.some(r => r.placement === 'DSQ' || r.placement === 'WD');
+      const year = String(c.date || '').slice(0, 4);
       return {
-        label: c.name.split(' ').slice(0,2).join(' '),
+        year,
         sp:    sp?.total_score ?? (hasNonFinish ? 0 : undefined),
         fs:    fs?.total_score ?? (hasNonFinish ? 0 : undefined),
         total: tot,
@@ -123,16 +124,21 @@ async function renderSkater({ id }) {
     })
     .filter(Boolean);
 
+  /* Only include competitions that have at least one charted score */
+  const charted = progressionData.filter(d => d.total > 0 || d.sp != null || d.fs != null);
+
+  /* All series share the same x-slots so scores stay aligned to their competition */
   const chartSeries = [];
-  if (progressionData.some(d => d.total > 0)) {
-    chartSeries.push({ label: 'Total', color: '#1C1C1A', data: progressionData.filter(d=>d.total>0).map(d=>({x:d.label,y:d.total})) });
+  if (charted.some(d => d.total > 0)) {
+    chartSeries.push({ label: 'Total', color: '#1C1C1A', data: charted.map(d => ({ y: d.total > 0 ? d.total : null })) });
   }
-  if (progressionData.some(d => d.sp != null)) {
-    chartSeries.push({ label: 'Short Program', color: '#2D4A1E', data: progressionData.filter(d=>d.sp!=null).map(d=>({x:d.label,y:d.sp})) });
+  if (charted.some(d => d.sp != null)) {
+    chartSeries.push({ label: 'Short Program', color: '#2D4A1E', data: charted.map(d => ({ y: d.sp != null ? d.sp : null })) });
   }
-  if (progressionData.some(d => d.fs != null)) {
-    chartSeries.push({ label: 'Free Skate', color: '#8BAF5A', data: progressionData.filter(d=>d.fs!=null).map(d=>({x:d.label,y:d.fs})) });
+  if (charted.some(d => d.fs != null)) {
+    chartSeries.push({ label: 'Free Skate', color: '#8BAF5A', data: charted.map(d => ({ y: d.fs != null ? d.fs : null })) });
   }
+  const chartXLabels = charted.map(d => d.year);
 
   function formatDate(d) {
     if (!d) return '';
@@ -300,7 +306,7 @@ async function renderSkater({ id }) {
 
   if (chartSeries.length) {
     const chartEl = document.getElementById('progression-chart');
-    if (chartEl) Charts.drawLineChart(chartEl, chartSeries);
+    if (chartEl) Charts.drawLineChart(chartEl, chartSeries, { xLabels: chartXLabels });
   }
 
   if (galleryImages.length) {

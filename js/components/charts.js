@@ -31,7 +31,7 @@ const Charts = (() => {
     const pw  = W - pad.left - pad.right;
     const ph  = H - pad.top  - pad.bottom;
 
-    const allY = series.flatMap(s => s.data.map(d => d.y)).filter(v => v > 0);
+    const allY = series.flatMap(s => s.data.map(d => d.y)).filter(v => v != null && v > 0);
     if (!allY.length) { container.innerHTML = '<p class="no-data" style="padding:1rem">No score data yet.</p>'; return; }
 
     const yMin = Math.floor(Math.min(...allY) * 0.96);
@@ -51,27 +51,53 @@ const Charts = (() => {
       svg.appendChild(el('text', { x: pad.left - 6, y: y + 4, fill: 'rgba(28,28,26,0.45)', 'font-size': 10, 'text-anchor': 'end', 'font-family': "'Space Mono',monospace" }, yv.toFixed(0)));
     }
 
-    /* x labels */
-    series[0].data.forEach((d, i) => {
-      svg.appendChild(el('text', {
-        x: xScale(i), y: H - 10,
-        fill: 'rgba(28,28,26,0.45)', 'font-size': 9, 'text-anchor': 'middle', 'font-family': "'Space Mono',monospace",
-      }, String(d.x || '').slice(0, 12)));
+    /* x axis — tick for every competition, year label only on first of that year */
+    const xLabels = options.xLabels || series[0].data.map(d => String(d.x || ''));
+    const axisY   = pad.top + ph;
+    let lastYear  = null;
+    xLabels.forEach((year, i) => {
+      const x = xScale(i);
+      svg.appendChild(el('line', { x1: x, y1: axisY, x2: x, y2: axisY + 4, stroke: 'rgba(28,28,26,0.20)', 'stroke-width': 1 }));
+      if (year && year !== lastYear) {
+        svg.appendChild(el('text', {
+          x, y: H - 10,
+          fill: 'rgba(28,28,26,0.55)', 'font-size': 9.5, 'font-weight': 700,
+          'text-anchor': 'middle', 'font-family': "'Space Mono',monospace",
+        }, year));
+        lastYear = year;
+      }
     });
 
-    /* series */
+    /* series — break lines at null values, skip null dots */
     const COLORS = ['#1C1C1A', '#2D4A1E', '#8BAF5A'];
     series.forEach((s, si) => {
       const color = s.color || COLORS[si % COLORS.length];
       if (!s.data.length) return;
 
-      svg.appendChild(el('polyline', {
-        points: s.data.map((d, i) => `${xScale(i)},${yScale(d.y)}`).join(' '),
-        fill: 'none', stroke: color, 'stroke-width': 2,
-        'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9,
-      }));
-
+      /* collect consecutive non-null runs and draw each as its own polyline */
+      let segment = [];
+      const flushSegment = () => {
+        if (segment.length >= 2) {
+          svg.appendChild(el('polyline', {
+            points: segment.map(p => `${p.cx},${p.cy}`).join(' '),
+            fill: 'none', stroke: color, 'stroke-width': 2,
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.9,
+          }));
+        }
+        segment = [];
+      };
       s.data.forEach((d, i) => {
+        if (d.y != null) {
+          segment.push({ cx: xScale(i), cy: yScale(d.y) });
+        } else {
+          flushSegment();
+        }
+      });
+      flushSegment();
+
+      /* dots and score labels for non-null points */
+      s.data.forEach((d, i) => {
+        if (d.y == null) return;
         const cx = xScale(i), cy = yScale(d.y);
         svg.appendChild(el('circle', { cx, cy, r: 7, fill: color, opacity: 0.12 }));
         svg.appendChild(el('circle', { cx, cy, r: 4, fill: color }));
