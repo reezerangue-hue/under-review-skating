@@ -226,11 +226,14 @@ async function renderHome() {
               <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Skaters</p>
               <h2 class="section-title">Top Skaters</h2>
             </div>
+            <div style="display:flex;align-items:center;gap:var(--space-sm)">
+            <a href="#/rankings" class="section-link">Full rankings →</a>
             <select id="top-skaters-filter" class="filter-select" aria-label="Filter top skaters">
               <option value="this-season">This Season</option>
               <option value="all-time">All Time</option>
               ${seasons.map(s => `<option value="${s}">${s}</option>`).join('')}
             </select>
+            </div>
           </div>
           <div id="top-skaters-wrap">
             ${skaterGridHTML(getTopSkaters('this-season'))}

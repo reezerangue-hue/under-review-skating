@@ -26,6 +26,7 @@ const Nav = (() => {
           <a href="#/skaters" class="nav-link" data-route="skaters">Skaters</a>
           <a href="#/stats"   class="nav-link" data-route="stats">Statistics</a>
           <a href="#/junior-eligibility" class="nav-link" data-route="junior-eligibility">Eligibility</a>
+          <a href="#/rankings"           class="nav-link" data-route="rankings">Rankings</a>
         </nav>
         <div class="nav-actions">
           <div class="search-wrap">
@@ -58,7 +59,8 @@ const Nav = (() => {
         (route === 'events'  && hash.startsWith('#/events')) ||
         (route === 'skaters' && hash.startsWith('#/skaters')) ||
         (route === 'stats'   && hash.startsWith('#/stats')) ||
-        (route === 'junior-eligibility' && hash.startsWith('#/junior-eligibility'));
+        (route === 'junior-eligibility' && hash.startsWith('#/junior-eligibility')) ||
+        (route === 'rankings'           && hash.startsWith('#/rankings'));
       a.classList.toggle('active', active);
     });
   }
