@@ -216,8 +216,10 @@ async function renderSkater({ id }) {
               { label:'Avg Total',        val:stats.avgTotal   ? stats.avgTotal.toFixed(2)   : '—' },
               { label:'Avg Component Mark', val:stats.avgComponent?stats.avgComponent.toFixed(2):'—' },
               { label:'Ultra-C Attempts', val:stats.ultraCAttempts },
+              ...(stats.ultraCAttempts > 0 ? [
               { label:'UC Landing Rate',  val:stats.ultraCLandingRate+'%' },
               { label:'Top Ultra-C',      val:stats.topUCElement, sub:stats.topUCAttempts?stats.topUCAttempts+' attempts':'' },
+              ] : []),
               { label:'Best GOE Element', val:stats.highestGOEElement, sub:stats.highestGOEValue>0?'+'+stats.highestGOEValue.toFixed(2):'' },
             ].map(s=>`
               <div class="stat-card">
