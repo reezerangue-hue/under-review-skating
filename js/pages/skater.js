@@ -26,6 +26,44 @@ async function renderSkater({ id }) {
 
   const compMap = Object.fromEntries(allComps.map(c => [c.id, c]));
 
+  /* ── Compute bests from results, override sheet if higher ──────────── */
+  const spResults = allResults.filter(r => r.segment === 'Short Program' && r.total_score > 0);
+  const fsResults = allResults.filter(r => r.segment === 'Free Skate'    && r.total_score > 0);
+
+  const computedPbShort = spResults.length ? Math.max(...spResults.map(r => r.total_score)) : 0;
+  const computedPbFree  = fsResults.length ? Math.max(...fsResults.map(r => r.total_score)) : 0;
+
+  const totalByComp = {};
+  allResults.filter(r => r.total_score > 0).forEach(r => {
+    totalByComp[r.competition_id] = (totalByComp[r.competition_id] || 0) + r.total_score;
+  });
+  const computedPbTotal = Object.values(totalByComp).length ? Math.max(...Object.values(totalByComp)) : 0;
+
+  const currentSeason = (() => {
+    const seasons = [...new Set(allComps.filter(c => c.season).map(c => c.season))].sort();
+    return seasons[seasons.length - 1] || null;
+  })();
+  const currentSeasonCompIds = new Set(allComps.filter(c => c.season === currentSeason).map(c => c.id));
+
+  const spSeason = spResults.filter(r => currentSeasonCompIds.has(r.competition_id));
+  const fsSeason = fsResults.filter(r => currentSeasonCompIds.has(r.competition_id));
+
+  const computedSbShort = spSeason.length ? Math.max(...spSeason.map(r => r.total_score)) : 0;
+  const computedSbFree  = fsSeason.length ? Math.max(...fsSeason.map(r => r.total_score)) : 0;
+
+  const seasonTotalByComp = {};
+  allResults.filter(r => r.total_score > 0 && currentSeasonCompIds.has(r.competition_id)).forEach(r => {
+    seasonTotalByComp[r.competition_id] = (seasonTotalByComp[r.competition_id] || 0) + r.total_score;
+  });
+  const computedSbTotal = Object.values(seasonTotalByComp).length ? Math.max(...Object.values(seasonTotalByComp)) : 0;
+
+  const pbShort = Math.max(skater.personal_best_short || 0, computedPbShort);
+  const pbFree  = Math.max(skater.personal_best_free  || 0, computedPbFree);
+  const pbTotal = Math.max(skater.personal_best_total || 0, computedPbTotal);
+  const sbShort = Math.max(skater.season_best_short   || 0, computedSbShort);
+  const sbFree  = Math.max(skater.season_best_free    || 0, computedSbFree);
+  const sbTotal = Math.max(skater.season_best_total   || 0, computedSbTotal);
+
   /* Overall placement per competition: rank by combined SP+FS total across all skaters */
   const overallRankByComp = {};
   [...new Set(allResults.map(r => r.competition_id))].forEach(compId => {
@@ -119,12 +157,12 @@ async function renderSkater({ id }) {
           </div>
           <div class="pb-grid">
             ${[
-              { label:'Short Program PB', val:skater.personal_best_short },
-              { label:'Free Skate PB',    val:skater.personal_best_free  },
-              { label:'Total PB',         val:skater.personal_best_total, lg:true },
-              { label:'Short Program SB', val:skater.season_best_short },
-              { label:'Free Skate SB',    val:skater.season_best_free  },
-              { label:'Total SB',         val:skater.season_best_total },
+              { label:'Short Program PB', val:pbShort },
+              { label:'Free Skate PB',    val:pbFree  },
+              { label:'Total PB',         val:pbTotal, lg:true },
+              { label:'Short Program SB', val:sbShort },
+              { label:'Free Skate SB',    val:sbFree  },
+              { label:'Total SB',         val:sbTotal },
             ].map(b=>`
               <div class="stat-card">
                 <span class="stat-label">${b.label}</span>
