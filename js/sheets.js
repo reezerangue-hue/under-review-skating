@@ -182,9 +182,9 @@ const SheetsDB = (() => {
       return cache.results.filter(r => r.skater_id === skaterId).map(hydrateResult);
     },
 
-    async getResult(resultId, competitionId = null) {
+    async getResult(resultId) {
       await loadAll();
-      const r = cache.results.find(r => r.result_id === resultId && (!competitionId || r.competition_id === competitionId));
+      const r = cache.results.find(r => r.id === resultId);
       return r ? hydrateResult(r) : null;
     },
 

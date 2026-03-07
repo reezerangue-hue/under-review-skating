@@ -86,7 +86,7 @@ async function renderCompetition({ id }) {
               const isNonFinish = r.placement === 'DSQ' || r.placement === 'WD';
               const qBadge = showQ && r.placement >= 1 && r.placement <= 24
                 ? `<span class="q-badge">Q</span>` : '';
-              return `<tr onclick="Router.go('/protocol/${id}/${r.result_id}')" title="View protocol">
+              return `<tr onclick="Router.go('/protocol/${r.id}')" title="View protocol">
                 <td class="place-cell ${pc}"${isNonFinish ? ' style="color:hsl(0,90%,60%);font-size:.85rem"' : ''}>${r.placement||'—'}</td>
                 <td>
                   <a href="#/skater/${r.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${sk?sk.name:'Unknown'}</a>
@@ -98,7 +98,7 @@ async function renderCompetition({ id }) {
                 <td class="score-cell" style="color:hsl(0,80%,70%)">${r.deductions?'-'+r.deductions.toFixed(2):'0.00'}</td>
                 <td class="score-cell total">${r.total_score?r.total_score.toFixed(2):'—'}</td>
                 <td style="text-align:right">
-                  <a href="#/protocol/${id}/${r.result_id}" onclick="event.stopPropagation()" class="btn" style="padding:3px 10px;font-size:.72rem">Sheet →</a>
+                  <a href="#/protocol/${r.id}" onclick="event.stopPropagation()" class="btn" style="padding:3px 10px;font-size:.72rem">Sheet →</a>
                 </td>
               </tr>`;
             }).join('')}
