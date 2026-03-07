@@ -2,10 +2,10 @@
  * Under Review Skating — Protocol Sheet View
  * Element-by-element breakdown for one result.
  */
-async function renderProtocol({ result_id }) {
+async function renderProtocol({ result_id, competition_id }) {
   const app = document.getElementById('app');
 
-  const result = await SheetsDB.getResult(result_id);
+  const result = await SheetsDB.getResult(result_id, competition_id || null);
 
   if (!result) {
     app.innerHTML = `
