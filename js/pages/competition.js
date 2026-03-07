@@ -34,8 +34,9 @@ async function renderCompetition({ id }) {
       return (skaterMap[a.skater_id]?.name||'').localeCompare(skaterMap[b.skater_id]?.name||'');
     });
 
-  /* Fetch all elements for this competition */
-  const allElements = (await Promise.all(results.map(r => SheetsDB.getElements(r.id)))).flat();
+  /* Fetch all elements for this competition, scoped by competition_id to avoid
+     result ID collisions across competitions producing incorrect counts */
+  const allElements = await SheetsDB.getCompetitionElements(id);
 
   /* Best moments */
   const maxGOEEl = allElements.reduce((best, e) => e.goe > (best?.goe ?? -99) ? e : best, null);

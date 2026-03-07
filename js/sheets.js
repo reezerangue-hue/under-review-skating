@@ -202,6 +202,13 @@ const SheetsDB = (() => {
       return cache.elements.filter(e => e.skater_id === skaterId).map(hydrateElement);
     },
 
+    async getCompetitionElements(competitionId) {
+      await loadAll();
+      return cache.elements
+        .filter(e => e.competition_id === competitionId)
+        .map(hydrateElement);
+    },
+
     /* --- Computed stats --- */
     async getSkaterStats(skaterId) {
       await loadAll();
