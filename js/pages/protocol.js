@@ -142,6 +142,8 @@ function renderElemCard(elem, landingRates) {
 
   const execLabels = (elem.execution || '').split(',').map(s => s.trim()).filter(Boolean)
     .map(label => label === 'Landed' ? 'Clean' : label);
+  const callLabels = (elem.calls || '').split(',').map(s => s.trim()).filter(Boolean);
+  const allBadgeLabels = [...execLabels, ...callLabels];
   const goeSign  = goe > 0 ? '+' : '';
   const goeClass = goe > 0 ? 'goe-pos' : goe < 0 ? 'goe-neg' : 'goe-zero';
   const pve      = elem.planned_vs_executed;
@@ -170,7 +172,7 @@ function renderElemCard(elem, landingRates) {
         ${elem.element_name ? `<p class="elem-name">${elem.element_name}</p>` : ''}
 
         <div class="elem-tags">
-          ${execLabels.map(label => {
+          ${allBadgeLabels.map(label => {
             const key = label.replace(/\s+/g, '');
             const known = ['Clean','Fall','StepOut','Downgraded','UnclearEdge','IncorrectEdge','RotationalFall','Quarter','Underrotated','Invalid','MissedRequirement','Repeat','FullyRotated'];
             const cls = known.includes(key) ? `exec-${key}` : 'exec-default';
