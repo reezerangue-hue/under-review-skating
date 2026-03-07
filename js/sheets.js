@@ -212,7 +212,10 @@ const SheetsDB = (() => {
       const ucLanded  = ucElems.filter(e => e.execution === 'Landed');
 
       const ucCounts = {};
-      ucElems.forEach(e => { ucCounts[e.element_code] = (ucCounts[e.element_code] || 0) + 1; });
+      ucElems.forEach(e => {
+        const code = e.element_code.split('+')[0];
+        ucCounts[code] = (ucCounts[code] || 0) + 1;
+      });
       const topUC = Object.entries(ucCounts).sort((a,b) => b[1]-a[1])[0];
 
       const highestGOE = elements.reduce((max, e) => e.goe > (max?.goe ?? -99) ? e : max, null);
