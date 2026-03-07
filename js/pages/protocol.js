@@ -5,10 +5,7 @@
 async function renderProtocol({ result_id }) {
   const app = document.getElementById('app');
 
-  const [result, elements] = await Promise.all([
-    SheetsDB.getResult(result_id),
-    SheetsDB.getElements(result_id),
-  ]);
+  const result = await SheetsDB.getResult(result_id);
 
   if (!result) {
     app.innerHTML = `
@@ -21,9 +18,12 @@ async function renderProtocol({ result_id }) {
     return;
   }
 
-  const [skater, competition] = await Promise.all([
+  /* Fetch elements scoped by competition_id to prevent result ID collisions
+     across competitions returning elements from the wrong event */
+  const [skater, competition, elements] = await Promise.all([
     SheetsDB.getSkater(result.skater_id),
     SheetsDB.getCompetition(result.competition_id),
+    SheetsDB.getElements(result_id, result.competition_id),
   ]);
 
   /* Landing rates for all Ultra-C elements in this protocol */
@@ -175,7 +175,8 @@ function renderElemCard(elem, landingRates) {
           ${allBadgeLabels.map(label => {
             const key = label.replace(/\s+/g, '');
             const known = ['Clean','Fall','StepOut','Downgraded','UnclearEdge','IncorrectEdge','RotationalFall','Quarter','Underrotated','Invalid','MissedRequirement','Repeat','FullyRotated'];
-            const cls = known.includes(key) ? `exec-${key}` : 'exec-default';
+            const match = known.find(k => k.toLowerCase() === key.toLowerCase());
+            const cls = match ? `exec-${match}` : 'exec-default';
             return `<span class="exec-badge ${cls}">${label}</span>`;
           }).join('')}
           ${showPVE ? `<span class="pve-badge ${pve==='Downgraded'?'pve-downgraded':pve==='Fall'?'pve-fall':'pve-executed'}">${pve==='Downgraded'?'▼ Downgraded':pve==='Fall'?'✕ Fall':'✓ Executed'}</span>` : ''}

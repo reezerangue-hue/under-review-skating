@@ -189,10 +189,10 @@ const SheetsDB = (() => {
     },
 
     /* --- Elements --- */
-    async getElements(resultId) {
+    async getElements(resultId, competitionId = null) {
       await loadAll();
       return cache.elements
-        .filter(e => e.result_id === resultId)
+        .filter(e => e.result_id === resultId && (!competitionId || e.competition_id === competitionId))
         .map(hydrateElement)
         .sort((a, b) => a.order_number - b.order_number);
     },
