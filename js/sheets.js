@@ -225,7 +225,7 @@ const SheetsDB = (() => {
       });
       const topUC = Object.entries(ucCounts).sort((a,b) => b[1]-a[1])[0];
 
-      const highestGOE = elements.reduce((max, e) => e.goe > (max?.goe ?? -99) ? e : max, null);
+      const highestGOE = elements.filter(e => e.element_code !== 'ChSq1').reduce((max, e) => e.goe > (max?.goe ?? -99) ? e : max, null);
 
       const compTotals = Object.values(
         results.filter(r => r.total_score > 0).reduce((acc, r) => {
