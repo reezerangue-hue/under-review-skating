@@ -106,6 +106,38 @@ async function renderCompetition({ id }) {
       </div>`;
   }
 
+  function totalTable(data) {
+    if (!data.length) return '<p class="no-data">No results recorded.</p>';
+    return `
+      <div class="table-wrap">
+        <table class="data-table" aria-label="Total results">
+          <thead><tr>
+            <th style="width:3rem">#</th>
+            <th>Skater</th>
+            <th style="text-align:right">SP</th>
+            <th style="text-align:right">FS</th>
+            <th style="text-align:right">Total</th>
+          </tr></thead>
+          <tbody>
+            ${data.map((d, i) => {
+              const sk = skaterMap[d.skater_id];
+              const pc = placeClass(i + 1);
+              return `<tr onclick="Router.go('/skater/${d.skater_id}')" style="cursor:pointer">
+                <td class="place-cell ${pc}">${i + 1}</td>
+                <td>
+                  <a href="#/skater/${d.skater_id}" onclick="event.stopPropagation()" style="font-weight:500">${d.skater_name}</a>
+                  ${sk ? `<span style="margin-left:6px;font-size:.8rem">${Nav.getFlagEmoji(sk.country_code)}</span>` : ''}
+                </td>
+                <td class="score-cell">${d.sp_score != null ? d.sp_score.toFixed(2) : '—'}</td>
+                <td class="score-cell">${d.fs_score != null ? d.fs_score.toFixed(2) : '—'}</td>
+                <td class="score-cell total">${d.total_score.toFixed(2)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
   /* Combined SP+FS total per skater for the score distribution chart */
   const combinedTotals = {};
   spResults.filter(r => r.total_score > 0).forEach(r => {
@@ -130,6 +162,8 @@ async function renderCompetition({ id }) {
     })
     .filter(d => d.total_score > 0)
     .sort((a, b) => b.total_score - a.total_score);
+
+  const defaultSeg = distData.length ? 'total' : spResults.length ? 'sp' : 'fs';
 
   /* Podium helper */
   const MEDAL = {
@@ -254,24 +288,19 @@ async function renderCompetition({ id }) {
           </div>
         </section>` : ''}
 
-        <!-- SHORT PROGRAM -->
-        ${spResults.length ? `
+        <!-- RESULTS (filterable by segment) -->
+        ${(distData.length || spResults.length || fsResults.length) ? `
         <section style="margin-bottom:var(--space-2xl)">
           <div class="section-header">
-            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Segment</p>
-            <h2 class="section-title">Short Program</h2>
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Results</p>
+            <h2 class="section-title">Results</h2>
           </div>
-          ${resultTable(spResults,'Short Program',true)}
-        </section>` : ''}
-
-        <!-- FREE SKATE -->
-        ${fsResults.length ? `
-        <section style="margin-bottom:var(--space-2xl)">
-          <div class="section-header">
-            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Segment</p>
-            <h2 class="section-title">Free Skate</h2>
+          <div style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-md);flex-wrap:wrap" role="group" aria-label="Filter by segment">
+            ${distData.length   ? `<button class="btn${defaultSeg !== 'total' ? ' btn-outline' : ''}" data-seg="total">Total</button>` : ''}
+            ${spResults.length  ? `<button class="btn${defaultSeg !== 'sp'    ? ' btn-outline' : ''}" data-seg="sp">Short Program</button>` : ''}
+            ${fsResults.length  ? `<button class="btn${defaultSeg !== 'fs'    ? ' btn-outline' : ''}" data-seg="fs">Free Skate</button>` : ''}
           </div>
-          ${resultTable(fsResults,'Free Skate')}
+          <div id="results-body"></div>
         </section>` : ''}
 
       </div>
@@ -324,4 +353,24 @@ async function renderCompetition({ id }) {
   }
   document.getElementById('dot-popup-backdrop').addEventListener('click', closePopup);
   document.getElementById('dot-popup-close').addEventListener('click', e => { e.stopPropagation(); closePopup(); });
+
+  /* Results segment filter */
+  const resultsBodyEl = document.getElementById('results-body');
+  if (resultsBodyEl) {
+    const segBtns = document.querySelectorAll('[data-seg]');
+    let activeSeg = defaultSeg;
+
+    function renderResultsTable() {
+      if (activeSeg === 'total')      resultsBodyEl.innerHTML = totalTable(distData);
+      else if (activeSeg === 'sp')    resultsBodyEl.innerHTML = resultTable(spResults, 'Short Program', true);
+      else if (activeSeg === 'fs')    resultsBodyEl.innerHTML = resultTable(fsResults, 'Free Skate', false);
+      segBtns.forEach(b => b.classList.toggle('btn-outline', b.dataset.seg !== activeSeg));
+    }
+
+    segBtns.forEach(btn => {
+      btn.addEventListener('click', () => { activeSeg = btn.dataset.seg; renderResultsTable(); });
+    });
+
+    renderResultsTable();
+  }
 }
