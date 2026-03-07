@@ -52,8 +52,14 @@ const SheetsDB = (() => {
       });
   }
 
-  async function fetchTab(tabName) {
+  async function fetchTab(tabName, attempt = 0) {
     const res = await fetch(sheetsUrl(tabName));
+    if (res.status === 429 && attempt < 3) {
+      const retryAfter = parseInt(res.headers.get('Retry-After') || '0', 10);
+      const delay = retryAfter > 0 ? retryAfter * 1000 : Math.pow(2, attempt) * 1500;
+      await new Promise(r => setTimeout(r, delay));
+      return fetchTab(tabName, attempt + 1);
+    }
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       throw new Error(`Sheets API error for tab "${tabName}" (${res.status}): ${text.slice(0,200)}`);
