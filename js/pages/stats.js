@@ -131,10 +131,19 @@ async function renderStats() {
     .filter(e => e.skaterList.length > 0)
     .sort((a, b) => b.totalAttempts - a.totalAttempts);
 
+  /* Compute actual PB per skater from results (max combined per competition),
+     same pattern as rankings/skater pages so the denominator is consistent */
+  const pbFromResults = {};
+  Object.values(comboMap).forEach(({ skater_id, total }) => {
+    if (total > 0 && (!pbFromResults[skater_id] || total > pbFromResults[skater_id]))
+      pbFromResults[skater_id] = total;
+  });
+
   /* Clutch ratings */
   const clutch = skaters
-    .filter(s=>s.personal_best_total>0)
     .map(s => {
+      const pb = Math.max(s.personal_best_total || 0, pbFromResults[s.id] || 0);
+      if (!pb) return null;
       const sRes = results.filter(r=>r.skater_id===s.id&&r.total_score>0);
       if (!sRes.length) return null;
       const combos = {};
@@ -142,7 +151,7 @@ async function renderStats() {
       const vals = Object.values(combos).filter(v=>v>0);
       if (vals.length < 2) return null;
       const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
-      return { skater:s, avg, pb:s.personal_best_total, ratio:avg/s.personal_best_total };
+      return { skater:s, avg, pb, ratio:avg/pb };
     })
     .filter(Boolean)
     .sort((a,b)=>b.ratio-a.ratio)
