@@ -218,7 +218,7 @@ async function renderSkater({ id }) {
               { label:'Ultra-C Attempts', val:stats.ultraCAttempts },
               ...(stats.ultraCAttempts > 0 ? [
               { label:'UC Landing Rate',  val:stats.ultraCLandingRate+'%' },
-              { label:'Top Ultra-C',      val:stats.topUCElement, sub:stats.topUCAttempts?stats.topUCAttempts+' attempts':'' },
+              { label:'Top Ultra-C',      val:stats.topUCElement.split('+')[0], sub:stats.topUCAttempts?stats.topUCAttempts+' attempts':'' },
               ] : []),
               { label:'Best GOE Element', val:stats.highestGOEElement, sub:stats.highestGOEValue>0?'+'+stats.highestGOEValue.toFixed(2):'' },
             ].map(s=>`
