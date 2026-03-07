@@ -18,6 +18,27 @@ async function renderSkaters() {
     ...skaters.filter(s => s.season_best_short > 0 || s.season_best_free > 0 || s.season_best_total > 0).map(s => s.id),
   ]);
 
+  /* Podium rate per skater — computed from results across all competitions */
+  const totalsByComp = {};
+  results.filter(r => r.total_score > 0).forEach(r => {
+    if (!totalsByComp[r.competition_id]) totalsByComp[r.competition_id] = {};
+    totalsByComp[r.competition_id][r.skater_id] =
+      (totalsByComp[r.competition_id][r.skater_id] || 0) + r.total_score;
+  });
+  const podiumCounts = {};
+  Object.values(totalsByComp).forEach(combined => {
+    const ranked = Object.entries(combined).sort((a, b) => b[1] - a[1]);
+    ranked.forEach(([sid], i) => {
+      if (!podiumCounts[sid]) podiumCounts[sid] = { podiums: 0, comps: 0 };
+      podiumCounts[sid].comps++;
+      if (i < 3) podiumCounts[sid].podiums++;
+    });
+  });
+  const podiumRates = {};
+  Object.entries(podiumCounts).forEach(([sid, { podiums, comps }]) => {
+    podiumRates[sid] = comps > 0 ? (podiums / comps) * 100 : 0;
+  });
+
   /* Sorted alphabetically */
   const sorted = [...skaters].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -65,7 +86,7 @@ async function renderSkaters() {
 
         <!-- SKATER GRID -->
         <div id="skaters-grid" class="grid-4" style="margin-bottom:var(--space-2xl)">
-          ${sorted.map(s => skaterCard(s)).join('')}
+          ${sorted.map(s => skaterCard(s, podiumRates[s.id] || 0)).join('')}
         </div>
 
         <p id="skaters-empty" class="no-data" style="display:none;text-align:center">No skaters match your filters.</p>
@@ -104,7 +125,7 @@ async function renderSkaters() {
       (!status || (status === 'active' ? activeIds.has(s.id) : !activeIds.has(s.id)))
     );
 
-    gridEl.innerHTML  = visible.map(s => skaterCard(s)).join('');
+    gridEl.innerHTML  = visible.map(s => skaterCard(s, podiumRates[s.id] || 0)).join('');
     emptyEl.style.display = visible.length ? 'none' : 'block';
     countEl.textContent   = `${visible.length} skater${visible.length !== 1 ? 's' : ''}`;
   }
@@ -115,9 +136,12 @@ async function renderSkaters() {
   applyFilters();
 }
 
-function skaterCard(s) {
+function skaterCard(s, podiumRate = 0) {
+  const eliteStyle = podiumRate >= 95
+    ? 'box-shadow:0 0 0 2px #C9A84C,0 6px 24px rgba(201,168,76,.18);'
+    : '';
   return `
-    <a href="#/skater/${s.id}" class="skater-card">
+    <a href="#/skater/${s.id}" class="skater-card" style="${eliteStyle}">
       ${s.photo_url
         ? `<img class="skater-photo" src="${s.photo_url}" alt="${s.name}" loading="lazy">`
         : `<div class="skater-photo-placeholder" aria-hidden="true">✦</div>`}
