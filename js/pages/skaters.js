@@ -39,8 +39,24 @@ async function renderSkaters() {
     podiumRates[sid] = comps > 0 ? (podiums / comps) * 100 : 0;
   });
 
+  /* Compute PB from results to fill in missing sheet values */
+  const comboMap = {};
+  results.filter(r => r.total_score > 0).forEach(r => {
+    const key = `${r.skater_id}||${r.competition_id}`;
+    if (!comboMap[key]) comboMap[key] = { skater_id: r.skater_id, total: 0 };
+    comboMap[key].total += r.total_score;
+  });
+  const computedPB = {};
+  Object.values(comboMap).forEach(({ skater_id, total }) => {
+    if (total > (computedPB[skater_id] || 0)) computedPB[skater_id] = total;
+  });
+  const enrichedSkaters = skaters.map(s => ({
+    ...s,
+    personal_best_total: Math.max(s.personal_best_total || 0, computedPB[s.id] || 0),
+  }));
+
   /* Sorted alphabetically */
-  const sorted = [...skaters].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...enrichedSkaters].sort((a, b) => a.name.localeCompare(b.name));
 
   /* Unique nations for the filter dropdown, sorted alphabetically */
   const nations = [...new Set(
