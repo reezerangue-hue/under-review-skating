@@ -269,12 +269,13 @@ const Charts = (() => {
 
       /* clean % label on right */
       const cleanCount = row.segments[0]?.count ?? 0;
-      const cleanPct   = row.total > 0 ? Math.round((cleanCount / row.total) * 100) : 0;
+      const cleanPct   = row.total > 0 ? Math.round((cleanCount / row.total) * 100) : null;
       svg.appendChild(el('text', {
         x: labelW + barW + 8, y: y + barH / 2 + 4,
-        fill: 'rgba(28,28,26,0.68)', 'font-size': 10.5, 'font-weight': 700,
+        fill: row.total > 0 ? 'rgba(28,28,26,0.68)' : 'rgba(28,28,26,0.28)',
+        'font-size': 10.5, 'font-weight': 700,
         'font-family': "'Space Mono',monospace",
-      }, `${cleanPct}%`));
+      }, cleanPct !== null ? `${cleanPct}%` : '—'));
     });
 
     container.appendChild(svg);

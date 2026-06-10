@@ -177,32 +177,30 @@ async function renderSkater({ id }) {
     else                       rotByType[type].clean++;
   });
 
-  const edgeRows = JUMP_ORDER
-    .filter(t => edgeByType[t].total > 0)
-    .map(t => ({
-      label: t,
-      total: edgeByType[t].total,
-      segments: [
-        { count: edgeByType[t].clean,   color: '#3D8B37' },
-        { count: edgeByType[t].warning, color: '#C97C2C' },
-        { count: edgeByType[t].wrong,   color: '#B03030' },
-      ],
-    }));
+  const hasJumpElements = skaterElements.some(e => parseJumpType(e.element_code) !== null);
 
-  const rotRows = JUMP_ORDER
-    .filter(t => rotByType[t].total > 0)
-    .map(t => ({
-      label: t,
-      total: rotByType[t].total,
-      segments: [
-        { count: rotByType[t].clean, color: '#3D8B37' },
-        { count: rotByType[t].q,     color: '#C4960F' },
-        { count: rotByType[t].under, color: '#C97C2C' },
-        { count: rotByType[t].dg,    color: '#B03030' },
-      ],
-    }));
+  const edgeRows = JUMP_ORDER.map(t => ({
+    label: t,
+    total: edgeByType[t].total,
+    segments: [
+      { count: edgeByType[t].clean,   color: '#3D8B37' },
+      { count: edgeByType[t].warning, color: '#C97C2C' },
+      { count: edgeByType[t].wrong,   color: '#B03030' },
+    ],
+  }));
 
-  const showCallsSection = edgeRows.length > 0 || rotRows.length > 0;
+  const rotRows = JUMP_ORDER.map(t => ({
+    label: t,
+    total: rotByType[t].total,
+    segments: [
+      { count: rotByType[t].clean, color: '#3D8B37' },
+      { count: rotByType[t].q,     color: '#C4960F' },
+      { count: rotByType[t].under, color: '#C97C2C' },
+      { count: rotByType[t].dg,    color: '#B03030' },
+    ],
+  }));
+
+  const showCallsSection = hasJumpElements;
 
   function formatDate(d) {
     if (!d) return '';
