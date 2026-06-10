@@ -4,7 +4,7 @@
 async function renderSkater({ id }) {
   const app = document.getElementById('app');
 
-  const [skater, allResults, allComps, stats, galleryImages, allResultsGlobal, allSkaters] = await Promise.all([
+  const [skater, allResults, allComps, stats, galleryImages, allResultsGlobal, allSkaters, skaterElements] = await Promise.all([
     SheetsDB.getSkater(id),
     SheetsDB.getSkaterResults(id),
     SheetsDB.getCompetitions(),
@@ -12,6 +12,7 @@ async function renderSkater({ id }) {
     SheetsDB.getSkaterGallery(id),
     SheetsDB.getResults(),
     SheetsDB.getSkaters(),
+    SheetsDB.getSkaterElements(id),
   ]);
 
   if (!skater) {
@@ -140,6 +141,69 @@ async function renderSkater({ id }) {
   }
   const chartXLabels = charted.map(d => d.year);
 
+  /* ── Jump call analysis ────────────────────────────────── */
+  const JUMP_TYPE_MAP = { a: 'Axel', s: 'Salchow', t: 'Toe Loop', lo: 'Loop', f: 'Flip', lz: 'Lutz' };
+  const JUMP_ORDER    = ['Axel', 'Lutz', 'Flip', 'Loop', 'Toe Loop', 'Salchow'];
+
+  function parseJumpType(code) {
+    const base = code.split('+')[0].replace(/[^a-zA-Z0-9]/g, '');
+    const m = base.match(/^\d+(A|S|T|Lo|F|Lz)$/i);
+    return m ? (JUMP_TYPE_MAP[m[1].toLowerCase()] || null) : null;
+  }
+
+  const edgeByType = {};
+  const rotByType  = {};
+  JUMP_ORDER.forEach(t => {
+    edgeByType[t] = { clean: 0, warning: 0, wrong: 0,      total: 0 };
+    rotByType[t]  = { clean: 0, q: 0, under: 0, dg: 0, total: 0 };
+  });
+
+  skaterElements.forEach(e => {
+    const type = parseJumpType(e.element_code);
+    if (!type) return;
+
+    const edgeCall = (e.edge_call     || '').trim();
+    const rotCall  = (e.rotation_call || '').trim();
+
+    edgeByType[type].total++;
+    if      (edgeCall === 'e') edgeByType[type].wrong++;
+    else if (edgeCall === '!') edgeByType[type].warning++;
+    else                       edgeByType[type].clean++;
+
+    rotByType[type].total++;
+    if      (rotCall === '<<') rotByType[type].dg++;
+    else if (rotCall === '<')  rotByType[type].under++;
+    else if (rotCall === 'q')  rotByType[type].q++;
+    else                       rotByType[type].clean++;
+  });
+
+  const edgeRows = JUMP_ORDER
+    .filter(t => edgeByType[t].total > 0)
+    .map(t => ({
+      label: t,
+      total: edgeByType[t].total,
+      segments: [
+        { count: edgeByType[t].clean,   color: '#3D8B37' },
+        { count: edgeByType[t].warning, color: '#C97C2C' },
+        { count: edgeByType[t].wrong,   color: '#B03030' },
+      ],
+    }));
+
+  const rotRows = JUMP_ORDER
+    .filter(t => rotByType[t].total > 0)
+    .map(t => ({
+      label: t,
+      total: rotByType[t].total,
+      segments: [
+        { count: rotByType[t].clean, color: '#3D8B37' },
+        { count: rotByType[t].q,     color: '#C4960F' },
+        { count: rotByType[t].under, color: '#C97C2C' },
+        { count: rotByType[t].dg,    color: '#B03030' },
+      ],
+    }));
+
+  const showCallsSection = edgeRows.length > 0 || rotRows.length > 0;
+
   function formatDate(d) {
     if (!d) return '';
     const parts = String(d).split('-');
@@ -242,6 +306,36 @@ async function renderSkater({ id }) {
           </div>
         </section>` : ''}
 
+        <!-- JUMP CALL ANALYSIS -->
+        ${showCallsSection ? `
+        <section style="margin-bottom:var(--space-2xl)">
+          <div class="section-header">
+            <p class="section-eyebrow">${Sparkles.html('sparkle-sm')} Analysis</p>
+            <h2 class="section-title">Jump Call Analysis</h2>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--space-lg)">
+            <div class="card">
+              <p style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--space-sm)">Edge Calls</p>
+              <div style="display:flex;gap:var(--space-md);flex-wrap:wrap;margin-bottom:var(--space-md);font-size:.68rem;font-family:'Space Mono',monospace;color:var(--text-secondary)">
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#3D8B37;flex-shrink:0"></span>Clean</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#C97C2C;flex-shrink:0"></span>! Unclear edge</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#B03030;flex-shrink:0"></span>e Wrong edge</span>
+              </div>
+              <div class="chart-wrap" id="edge-calls-chart"></div>
+            </div>
+            <div class="card">
+              <p style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--space-sm)">Underrotation Calls</p>
+              <div style="display:flex;gap:var(--space-md);flex-wrap:wrap;margin-bottom:var(--space-md);font-size:.68rem;font-family:'Space Mono',monospace;color:var(--text-secondary)">
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#3D8B37;flex-shrink:0"></span>Clean</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#C4960F;flex-shrink:0"></span>q Quarter</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#C97C2C;flex-shrink:0"></span>&lt; Under</span>
+                <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#B03030;flex-shrink:0"></span>&lt;&lt; Downgraded</span>
+              </div>
+              <div class="chart-wrap" id="rotation-calls-chart"></div>
+            </div>
+          </div>
+        </section>` : ''}
+
         <!-- COMPETITION HISTORY -->
         <!-- GALLERY -->
         ${galleryImages.length ? `
@@ -309,6 +403,13 @@ async function renderSkater({ id }) {
   if (chartSeries.length) {
     const chartEl = document.getElementById('progression-chart');
     if (chartEl) Charts.drawLineChart(chartEl, chartSeries, { xLabels: chartXLabels });
+  }
+
+  if (showCallsSection) {
+    const edgeEl = document.getElementById('edge-calls-chart');
+    const rotEl  = document.getElementById('rotation-calls-chart');
+    if (edgeEl) Charts.drawCallsChart(edgeEl, edgeRows, { id: 'edge' });
+    if (rotEl)  Charts.drawCallsChart(rotEl,  rotRows,  { id: 'rot'  });
   }
 
   if (galleryImages.length) {

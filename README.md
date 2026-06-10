@@ -124,10 +124,12 @@ One row per element per result.
 | `is_second_half` | `TRUE` or `FALSE` |
 | `execution` | One of: `Landed`, `Fall`, `Step Out`, `Downgraded`, `Unclear Edge`, `Rotational Fall` |
 | `planned_vs_executed` | One of: `Planned`, `Executed`, `Downgraded` |
+| `rotation_call` | Underrotation call for jump elements: leave blank for clean, `q` (quarter under), `<` (underrotated), `<<` (downgraded). Leave blank for non-jump elements. |
+| `edge_call` | Edge call for jump elements: leave blank for clean, `!` (unclear edge), `e` (wrong edge). Leave blank for non-jump elements. For combination jumps the call applies to the first (main) jump. |
 
 **Example row:**
 ```
-gpf24-yuna-sp-e1, gpf24-yuna-sp, yuna-kim, gpf-2024, Short Program, 1, 4Lz, Quadruple Lutz, 11.50, 2.07, 13.57, TRUE, FALSE, Landed, Executed
+gpf24-yuna-sp-e1, gpf24-yuna-sp, yuna-kim, gpf-2024, Short Program, 1, 4Lz, Quadruple Lutz, 11.50, 2.07, 13.57, TRUE, FALSE, Landed, Executed, , e
 ```
 
 ---

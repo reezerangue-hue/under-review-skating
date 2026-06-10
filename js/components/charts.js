@@ -204,5 +204,81 @@ const Charts = (() => {
     container.appendChild(svg);
   }
 
-  return { drawLineChart, drawBarChart, drawDotChart };
+  /* ── Jump Calls Stacked Bar Chart ───────────────────────
+     rows: [{ label, total, segments: [{ count, color }] }]
+     First segment is always the "clean" category.
+  ─────────────────────────────────────────────────────── */
+  function drawCallsChart(container, rows, options = {}) {
+    container.innerHTML = '';
+    if (!rows.length) {
+      container.innerHTML = '<p class="no-data" style="padding:1rem">No jump data.</p>';
+      return;
+    }
+
+    const barH   = 22;
+    const gap    = 10;
+    const labelW = 88;
+    const pctW   = 52;
+    const W      = 560;
+    const H      = rows.length * (barH + gap) + gap;
+    const barW   = W - labelW - pctW - 12;
+
+    const svg = svgRoot(W, H, 'calls-chart');
+
+    /* defs: one clipPath per row for rounded bar ends */
+    const defs = document.createElementNS(NS, 'defs');
+    rows.forEach((_, i) => {
+      const cp = document.createElementNS(NS, 'clipPath');
+      cp.setAttribute('id', `cc-${options.id || 'c'}-${i}`);
+      const y = gap / 2 + i * (barH + gap);
+      cp.appendChild(el('rect', { x: labelW, y, width: barW, height: barH, rx: 4 }));
+      defs.appendChild(cp);
+    });
+    svg.appendChild(defs);
+
+    rows.forEach((row, i) => {
+      const y      = gap / 2 + i * (barH + gap);
+      const clipId = `cc-${options.id || 'c'}-${i}`;
+
+      /* jump type label */
+      svg.appendChild(el('text', {
+        x: labelW - 8, y: y + barH / 2 + 4,
+        fill: 'rgba(28,28,26,0.68)', 'font-size': 10.5, 'text-anchor': 'end',
+        'font-family': "'Space Mono',monospace", 'font-weight': 700,
+      }, row.label));
+
+      /* background track */
+      svg.appendChild(el('rect', {
+        x: labelW, y, width: barW, height: barH, rx: 4,
+        fill: 'rgba(28,28,26,0.07)',
+      }));
+
+      /* stacked segments, clipped to rounded track */
+      let xOff = 0;
+      row.segments.forEach(seg => {
+        if (!seg.count || !row.total) return;
+        const sw = (seg.count / row.total) * barW;
+        svg.appendChild(el('rect', {
+          x: labelW + xOff, y,
+          width: Math.max(sw, 0), height: barH,
+          rx: 0, fill: seg.color, opacity: 0.88,
+          'clip-path': `url(#${clipId})`,
+        }));
+        xOff += sw;
+      });
+
+      /* clean % label on right */
+      const cleanCount = row.segments[0]?.count ?? 0;
+      const cleanPct   = row.total > 0 ? Math.round((cleanCount / row.total) * 100) : 0;
+      svg.appendChild(el('text', {
+        x: labelW + barW + 8, y: y + barH / 2 + 4,
+        fill: 'rgba(28,28,26,0.68)', 'font-size': 10.5, 'font-weight': 700,
+        'font-family': "'Space Mono',monospace",
+      }, `${cleanPct}%`));
+    });
+
+    container.appendChild(svg);
+  }
+
+  return { drawLineChart, drawBarChart, drawDotChart, drawCallsChart };
 })();
